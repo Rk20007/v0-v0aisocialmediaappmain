@@ -21,6 +21,8 @@ export async function GET(request) {
     const userId = new ObjectId(session.userId)
     const friendObjId = new ObjectId(friendId)
 
+    console.log("[v0] Fetching messages between", session.userId, "and", friendId)
+
     const messages = await db
       .collection("messages")
       .find({
@@ -31,6 +33,8 @@ export async function GET(request) {
       })
       .sort({ createdAt: 1 })
       .toArray()
+
+    console.log("[v0] Found", messages.length, "messages")
 
     const serializedMessages = messages.map((m) => ({
       ...m,
@@ -69,6 +73,8 @@ export async function POST(request) {
       read: false,
       createdAt: new Date(),
     }
+
+    console.log("[v0] Creating message from", session.userId, "to", receiverId)
 
     await db.collection("messages").insertOne(message)
 

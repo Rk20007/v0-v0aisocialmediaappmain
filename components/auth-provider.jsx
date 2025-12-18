@@ -8,13 +8,13 @@ const AuthContext = createContext(null)
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
 export function AuthProvider({ children }) {
-  const [cacheKey, setCacheKey] = useState(() => `/api/auth/me?t=${Date.now()}`)
+  const [cacheKey, setCacheKey] = useState(() => `/api/auth/me?session=${Math.random()}`)
 
   const { data, error, mutate } = useSWR(cacheKey, fetcher, {
     revalidateOnFocus: false,
-    revalidateOnReconnect: true,
+    revalidateOnReconnect: false, // Disable to prevent unwanted refetch
     shouldRetryOnError: false,
-    dedupingInterval: 0, // Disable deduping to always fetch fresh data
+    dedupingInterval: 0,
   })
 
   const [isLoading, setIsLoading] = useState(true)
@@ -28,6 +28,10 @@ export function AuthProvider({ children }) {
   const user = data?.user || null
   const isAuthenticated = !!user
 
+  useEffect(() => {
+    console.log("[v0] Auth state changed - User:", user ? user.email : "None")
+  }, [user])
+
   const login = async (credentials) => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -37,9 +41,21 @@ export function AuthProvider({ children }) {
     })
     const data = await res.json()
     if (data.success) {
-      const newCacheKey = `/api/auth/me?t=${Date.now()}`
+      console.log("[v0] Login successful, clearing cache and fetching new user")
+      const newCacheKey = `/api/auth/me?session=${Math.random()}`
       setCacheKey(newCacheKey)
-      await mutate(data, false)
+
+      // Clear all SWR cache
+      if (typeof window !== "undefined") {
+        const cache = mutate.cache
+        if (cache && typeof cache.clear === "function") {
+          cache.clear()
+        }
+      }
+
+      // Wait a bit for cookie to be set, then fetch fresh data
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      await mutate()
     }
     return data
   }
@@ -53,14 +69,26 @@ export function AuthProvider({ children }) {
     })
     const data = await res.json()
     if (data.success) {
-      const newCacheKey = `/api/auth/me?t=${Date.now()}`
+      console.log("[v0] Signup successful, clearing cache and fetching new user")
+      const newCacheKey = `/api/auth/me?session=${Math.random()}`
       setCacheKey(newCacheKey)
-      await mutate({ user: data.user }, false)
+
+      if (typeof window !== "undefined") {
+        const cache = mutate.cache
+        if (cache && typeof cache.clear === "function") {
+          cache.clear()
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      await mutate()
     }
     return data
   }
 
   const logout = async () => {
+    console.log("[v0] Logging out...")
+
     await mutate({ user: null }, false)
 
     await fetch("/api/auth/logout", {
@@ -68,15 +96,19 @@ export function AuthProvider({ children }) {
       credentials: "include",
     })
 
-    const newCacheKey = `/api/auth/me?t=${Date.now()}`
+    const newCacheKey = `/api/auth/me?session=${Math.random()}`
     setCacheKey(newCacheKey)
 
     if (typeof window !== "undefined") {
-      const swrCache = mutate.cache
-      if (swrCache && typeof swrCache.clear === "function") {
-        swrCache.clear()
+      const cache = mutate.cache
+      if (cache && typeof cache.clear === "function") {
+        cache.clear()
       }
+      // Also clear any other storage that might cache user data
+      sessionStorage.clear()
     }
+
+    console.log("[v0] Logout complete - all cache cleared")
   }
 
   const updateProfile = async (profileData) => {
@@ -104,7 +136,7 @@ export function AuthProvider({ children }) {
         logout,
         updateProfile,
         refresh: () => {
-          const newCacheKey = `/api/auth/me?t=${Date.now()}`
+          const newCacheKey = `/api/auth/me?session=${Math.random()}`
           setCacheKey(newCacheKey)
           return mutate()
         },

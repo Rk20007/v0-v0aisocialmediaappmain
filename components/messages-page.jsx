@@ -3,6 +3,7 @@
 import { useState } from "react"
 import useSWR from "swr"
 import Link from "next/link"
+import { useAuth } from "@/components/auth-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,12 +14,23 @@ import { formatDistanceToNow } from "date-fns"
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
 export default function MessagesPage() {
+  const { user } = useAuth()
   const [search, setSearch] = useState("")
-  const { data: conversationsData, isLoading: isLoadingConversations } = useSWR("/api/conversations", fetcher, {
-    refreshInterval: 5000, // Refresh every 5 seconds for new messages
-    revalidateOnFocus: true,
-  })
-  const { data: usersData, isLoading: isLoadingUsers } = useSWR("/api/users/all", fetcher)
+
+  const { data: conversationsData, isLoading: isLoadingConversations } = useSWR(
+    user?._id ? `/api/conversations?cache=${user._id}` : null,
+    fetcher,
+    {
+      refreshInterval: 5000,
+      revalidateOnFocus: true,
+      dedupingInterval: 2000, // Prevent duplicate requests
+    },
+  )
+
+  const { data: usersData, isLoading: isLoadingUsers } = useSWR(
+    user?._id ? `/api/users/all?cache=${user._id}` : null,
+    fetcher,
+  )
 
   const conversations = conversationsData?.conversations || []
   const allUsers = usersData?.users || []

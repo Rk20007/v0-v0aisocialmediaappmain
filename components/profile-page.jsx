@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Settings, LogOut, Grid, Bookmark, MapPin, Calendar, Loader2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { useEffect } from "react"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
@@ -16,8 +17,14 @@ export default function ProfilePage() {
   const router = useRouter()
   const { user, logout } = useAuth()
 
+  useEffect(() => {
+    if (user) {
+      console.log("[v0] ProfilePage - Current user:", user.email, "ID:", user._id)
+    }
+  }, [user])
+
   const { data: postsData, isLoading } = useSWR(
-    user?._id ? `/api/posts?userId=${user._id}&t=${Date.now()}` : null,
+    user?._id ? `/api/posts?userId=${user._id}&cache=${user._id}` : null,
     fetcher,
     {
       revalidateOnFocus: false,
@@ -28,6 +35,7 @@ export default function ProfilePage() {
   const posts = postsData?.posts || []
 
   const handleLogout = async () => {
+    console.log("[v0] Profile logout initiated")
     await logout()
     router.push("/login")
   }
@@ -66,6 +74,7 @@ export default function ProfilePage() {
       {/* Profile Info */}
       <div className="px-4 pt-14 pb-4">
         <h1 className="text-xl font-bold">{user.name}</h1>
+        <p className="text-xs text-muted-foreground">{user.email}</p>
         {user.bio && <p className="text-muted-foreground mt-1">{user.bio}</p>}
 
         <div className="flex flex-wrap gap-3 mt-3 text-sm text-muted-foreground">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import useSWR from "swr"
 import { useAuth } from "@/components/auth-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -28,8 +28,8 @@ export default function StoriesBar() {
   const [caption, setCaption] = useState("")
   const fileInputRef = useRef(null)
 
-  const { data, mutate } = useSWR("/api/stories", fetcher, {
-    refreshInterval: 30000, // Refresh every 30 seconds
+  const { data, mutate } = useSWR(user?._id ? `/api/stories?cache=${user._id}` : null, fetcher, {
+    refreshInterval: 30000,
   })
 
   const stories = data?.stories || []
@@ -138,26 +138,31 @@ export default function StoriesBar() {
         </button>
 
         {/* Stories List */}
-        {stories.map((userStory) => (
-          <button
-            key={userStory.userId}
-            onClick={() => openStoryViewer(userStory)}
-            className="flex-shrink-0 flex flex-col items-center gap-1.5"
-          >
-            <div
-              className={cn(
-                "p-0.5 rounded-full",
-                userStory.userId === user?._id ? "bg-muted" : "bg-gradient-to-tr from-primary to-secondary",
-              )}
+        {stories.map((userStory) => {
+          const isOwn = userStory.userId === user?._id
+          const allViewed = userStory.allViewed
+
+          return (
+            <button
+              key={userStory.userId}
+              onClick={() => openStoryViewer(userStory)}
+              className="flex-shrink-0 flex flex-col items-center gap-1.5"
             >
-              <Avatar className="h-16 w-16 ring-2 ring-background">
-                <AvatarImage src={userStory.user?.avatar || "/placeholder.svg"} />
-                <AvatarFallback>{userStory.user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </div>
-            <span className="text-xs font-medium truncate w-16 text-center">{userStory.user?.name}</span>
-          </button>
-        ))}
+              <div
+                className={cn(
+                  "p-0.5 rounded-full",
+                  isOwn ? "bg-muted" : allViewed ? "bg-muted" : "bg-gradient-to-tr from-primary to-secondary",
+                )}
+              >
+                <Avatar className="h-16 w-16 ring-2 ring-background">
+                  <AvatarImage src={userStory.user?.avatar || "/placeholder.svg"} />
+                  <AvatarFallback>{userStory.user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </div>
+              <span className="text-xs font-medium truncate w-16 text-center">{userStory.user?.name}</span>
+            </button>
+          )
+        })}
       </div>
 
       {/* Upload Modal */}
@@ -275,34 +280,46 @@ export default function StoriesBar() {
 
       {/* Story Viewer */}
       {showViewer && selectedUserStories && (
-        <StoryViewer userStories={selectedUserStories} onClose={() => setShowViewer(false)} />
+        <StoryViewer userStories={selectedUserStories} onClose={() => setShowViewer(false)} mutate={mutate} />
       )}
     </>
   )
 }
 
-function StoryViewer({ userStories, onClose }) {
-  const [currentIndex, setCurrentIndex] = useState(0)
+function StoryViewer({ userStories, onClose, mutate }) {
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const firstUnviewed = userStories.stories.findIndex((s) => !s.viewedByCurrentUser)
+    return firstUnviewed >= 0 ? firstUnviewed : 0
+  })
   const [progress, setProgress] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
   const currentStory = userStories.stories[currentIndex]
+  const intervalRef = useRef(null)
 
-  // Mark story as viewed
-  useState(() => {
-    if (currentStory) {
-      fetch(`/api/stories/${currentStory._id}/view`, {
-        method: "POST",
-        credentials: "include",
-      })
+  useEffect(() => {
+    if (!currentStory || currentStory.viewedByCurrentUser) return
+
+    fetch(`/api/stories/${currentStory._id}/view`, {
+      method: "POST",
+      credentials: "include",
+    }).then(() => {
+      mutate()
+    })
+  }, [currentStory, mutate])
+
+  useEffect(() => {
+    if (isPaused) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      return
     }
-  }, [currentStory])
 
-  // Auto-progress through stories
-  useState(() => {
     const duration = currentStory?.mediaType === "video" ? 15000 : 5000
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          // Move to next story
           if (currentIndex < userStories.stories.length - 1) {
             setCurrentIndex((i) => i + 1)
             return 0
@@ -315,17 +332,48 @@ function StoryViewer({ userStories, onClose }) {
       })
     }, 100)
 
-    return () => clearInterval(interval)
-  }, [currentIndex, currentStory, onClose, userStories.stories.length])
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [currentIndex, currentStory, onClose, userStories.stories.length, isPaused])
+
+  const goToPrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex((i) => i - 1)
+      setProgress(0)
+    } else {
+      onClose()
+    }
+  }
+
+  const goToNext = () => {
+    if (currentIndex < userStories.stories.length - 1) {
+      setCurrentIndex((i) => i + 1)
+      setProgress(0)
+    } else {
+      onClose()
+    }
+  }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div
+      className="fixed inset-0 z-50 bg-black"
+      onMouseDown={() => setIsPaused(true)}
+      onMouseUp={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
       {/* Progress Bars */}
       <div className="absolute top-0 left-0 right-0 z-20 flex gap-1 p-2">
-        {userStories.stories.map((_, i) => (
+        {userStories.stories.map((story, i) => (
           <div key={i} className="flex-1 h-0.5 bg-white/30 rounded-full overflow-hidden">
             <div
-              className="h-full bg-white transition-all"
+              className={cn(
+                "h-full transition-all",
+                story.viewedByCurrentUser && i !== currentIndex ? "bg-white/60" : "bg-white",
+              )}
               style={{
                 width: i < currentIndex ? "100%" : i === currentIndex ? `${progress}%` : "0%",
               }}
@@ -384,28 +432,8 @@ function StoryViewer({ userStories, onClose }) {
       )}
 
       {/* Navigation */}
-      <button
-        onClick={() => {
-          if (currentIndex > 0) {
-            setCurrentIndex((i) => i - 1)
-            setProgress(0)
-          } else {
-            onClose()
-          }
-        }}
-        className="absolute left-0 top-0 bottom-0 w-1/3 z-10"
-      />
-      <button
-        onClick={() => {
-          if (currentIndex < userStories.stories.length - 1) {
-            setCurrentIndex((i) => i + 1)
-            setProgress(0)
-          } else {
-            onClose()
-          }
-        }}
-        className="absolute right-0 top-0 bottom-0 w-1/3 z-10"
-      />
+      <button onClick={goToPrevious} className="absolute left-0 top-0 bottom-0 w-1/3 z-10" />
+      <button onClick={goToNext} className="absolute right-0 top-0 bottom-0 w-1/3 z-10" />
     </div>
   )
 }

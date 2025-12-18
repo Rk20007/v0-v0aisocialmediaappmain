@@ -23,19 +23,25 @@ export default function ChatPage({ friendId }) {
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
   const { data: messagesData, mutate } = useSWR(
-    friendId ? `/api/messages?friendId=${friendId}&t=${Date.now()}` : null,
+    friendId && user?._id ? `/api/messages?friendId=${friendId}&cache=${user._id}` : null,
     fetcher,
     {
-      refreshInterval: 2000, // Poll every 2 seconds for real-time updates
+      refreshInterval: 3000, // Poll every 3 seconds
       revalidateOnFocus: true,
-      dedupingInterval: 0,
+      dedupingInterval: 1000, // Prevent duplicate requests within 1 second
     },
   )
 
-  const { data: friendData } = useSWR(friendId ? `/api/user/profile?userId=${friendId}` : null, fetcher)
+  const { data: friendData } = useSWR(friendId ? `/api/users/${friendId}` : null, fetcher)
 
   const messages = messagesData?.messages || []
   const friend = friendData?.user
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      console.log("[v0] Chat messages loaded:", messages.length, "messages")
+    }
+  }, [messages.length])
 
   useEffect(() => {
     if (shouldAutoScroll) {
@@ -83,10 +89,17 @@ export default function ChatPage({ friendId }) {
         credentials: "include",
       })
 
-      if (!res.ok) throw new Error("Failed to send message")
+      const data = await res.json()
+
+      if (!data.success) {
+        throw new Error(data.error || "Failed to send message")
+      }
+
+      console.log("[v0] Message sent successfully")
 
       await mutate()
     } catch (error) {
+      console.error("[v0] Failed to send message:", error)
       setMessage(content)
       mutate()
     } finally {
@@ -102,6 +115,23 @@ export default function ChatPage({ friendId }) {
     groups[date].push(msg)
     return groups
   }, {})
+
+  if (!friend) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-8rem)]">
+        <div className="flex items-center gap-3 p-4 border-b border-border bg-card shadow-sm">
+          <Link href="/messages">
+            <Button variant="ghost" size="icon" className="h-9 w-9">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div className="flex-1">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
