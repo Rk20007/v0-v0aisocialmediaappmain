@@ -13,6 +13,7 @@ export async function GET() {
 
     const db = await getDb()
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const currentUserId = new ObjectId(session.userId)
 
     // Get all active stories grouped by user
     const stories = await db
@@ -31,11 +32,21 @@ export async function GET() {
         },
         { $unwind: "$user" },
         {
+          $addFields: {
+            viewedByCurrentUser: {
+              $in: [currentUserId, { $ifNull: ["$views", []] }],
+            },
+          },
+        },
+        {
           $group: {
             _id: "$userId",
             user: { $first: "$user" },
             stories: { $push: "$$ROOT" },
             lastUpdated: { $max: "$createdAt" },
+            allViewed: {
+              $min: "$viewedByCurrentUser",
+            },
           },
         },
         { $sort: { lastUpdated: -1 } },
@@ -52,9 +63,11 @@ export async function GET() {
         mediaType: s.mediaType,
         caption: s.caption,
         views: s.views?.length || 0,
+        viewedByCurrentUser: s.viewedByCurrentUser,
         createdAt: s.createdAt,
       })),
       lastUpdated: group.lastUpdated,
+      allViewed: group.allViewed, // Add flag for all stories viewed
     }))
 
     return NextResponse.json({ success: true, stories: serializedStories })
