@@ -5,8 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, X } from "lucide-react"
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
@@ -18,7 +17,6 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
   const [comment, setComment] = useState("")
   const [comments, setComments] = useState(post.comments || [])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isImageOpen, setIsImageOpen] = useState(false)
 
   const handleLike = async () => {
     setIsLiked(!isLiked)
@@ -84,33 +82,14 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
         {post.caption && <p className="text-sm mb-3 whitespace-pre-wrap">{post.caption}</p>}
 
         {post.imageUrl && (
-          <Dialog open={isImageOpen} onOpenChange={setIsImageOpen}>
-            <DialogTrigger asChild>
-              <div className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer">
-                <img
-                  src={post.imageUrl || "/placeholder.svg"}
-                  alt="Post"
-                  className="w-full h-full object-cover transition-transform hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-            </DialogTrigger>
-            <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent border-none shadow-none flex items-center justify-center [&>button]:hidden">
-              <div className="relative">
-                <button
-                  onClick={() => setIsImageOpen(false)}
-                  className="absolute top-2 right-2 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors z-10 backdrop-blur-sm"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-                <img
-                  src={post.imageUrl || "/placeholder.svg"}
-                  alt="Post"
-                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+          <div className="relative rounded-xl overflow-hidden bg-muted aspect-square">
+            <img
+              src={post.imageUrl || "/placeholder.svg"}
+              alt="Post"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
         )}
 
         {post.tags?.length > 0 && (

@@ -17,7 +17,6 @@ export default function CreatePage() {
   const [tags, setTags] = useState("")
   const [imageSrc, setImageSrc] = useState("")
   const [characterImage, setCharacterImage] = useState("")
-  const [uniformImage, setUniformImage] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
 
@@ -43,8 +42,7 @@ export default function CreatePage() {
     try {
       const body = {
         topic: topic,
-        character_Image: characterImage,
-        uniformImage: uniformImage,
+        character: characterImage,
       }
 
       const res = await fetch("/api/ai/generate-image", {
@@ -153,27 +151,6 @@ export default function CreatePage() {
     if (input) input.value = ""
   }
 
-  const handleUniformFileChange = (e) => {
-    const file = e.target.files?.[0]
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        setUniformImage(ev.target?.result)
-        toast({
-          title: "✓ Uniform Selected",
-          description: "Image upload successful",
-        })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const removeUniformImage = () => {
-    setUniformImage("")
-    const input = document.getElementById("uniform-input")
-    if (input) input.value = ""
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 p-4 relative overflow-hidden">
       {/* Background Pattern */}
@@ -221,7 +198,7 @@ export default function CreatePage() {
               <Sparkles className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-5xl font-black bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
-              Color Code
+              colorCode
             </h1>
           </div>
           <p className="text-gray-600 text-xl font-medium">AI के साथ अपना creative vision बनाएं</p>
@@ -292,69 +269,6 @@ export default function CreatePage() {
                 accept="image/*" 
                 className="hidden" 
                 onChange={handleFileChange} 
-              />
-            </div>
-
-            {/* Uniform Image Upload - BELOW CHARACTER */}
-            <div className="space-y-4">
-              <Label className="text-xl font-bold flex items-center gap-3 text-gray-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Image className="h-5 w-5 text-white" />
-                </div>
-                Uniform / Dress Reference
-                <span className="text-sm text-gray-500 font-semibold bg-gray-100 px-3 py-1 rounded-full">Optional</span>
-              </Label>
-              
-              {!uniformImage ? (
-                <div 
-                  onClick={() => document.getElementById("uniform-input")?.click()}
-                  className="relative border-4 border-dashed border-purple-300 rounded-3xl p-12 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50/80 transition-all group overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 to-indigo-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative flex flex-col items-center gap-4">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
-                      <Upload className="h-12 w-12 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xl font-bold text-gray-800 mb-2">Upload Uniform</p>
-                      <p className="text-base text-gray-600">PNG, JPG or JPEG • Max 10MB</p>
-                      <p className="text-sm text-gray-500 mt-2">Optional: Dress style reference</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative rounded-3xl overflow-hidden border-4 border-purple-400 shadow-2xl animate-scale-in group">
-                  <img 
-                    src={uniformImage} 
-                    alt="Uniform" 
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <button
-                    onClick={removeUniformImage}
-                    className="absolute top-4 right-4 p-3 bg-purple-500 rounded-full text-white hover:bg-purple-600 transition-all hover:scale-110 shadow-2xl hover:rotate-90 duration-300"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-6">
-                    <div className="flex items-center justify-between">
-                      <p className="text-white text-lg font-bold flex items-center gap-2">
-                        <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
-                        Uniform Ready
-                      </p>
-                      <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                        <span className="text-white text-sm font-semibold">✓ Uploaded</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <input 
-                type="file" 
-                id="uniform-input" 
-                accept="image/*" 
-                className="hidden" 
-                onChange={handleUniformFileChange} 
               />
             </div>
 

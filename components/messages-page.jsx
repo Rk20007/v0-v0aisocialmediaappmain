@@ -82,7 +82,7 @@ export default function MessagesPage() {
           <h2 className="text-sm font-medium text-muted-foreground px-2">Active Chats</h2>
           {filteredConversations.map((conv) => (
             <Link key={conv.friendId} href={`/messages/${conv.friendId}`}>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01] mt-3">
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01]">
                 <CardContent className="py-3">
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -123,7 +123,7 @@ export default function MessagesPage() {
           <h2 className="text-sm font-medium text-muted-foreground px-2">Start a New Chat</h2>
           {filteredOtherUsers.map((user) => (
             <Link key={user._id} href={`/messages/${user._id}`}>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01] mt-3">
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01]">
                 <CardContent className="py-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
