@@ -172,7 +172,7 @@ export default function ReelsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-8rem)] bg-black">
+      <div className="flex items-center justify-center h-screen bg-black">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     )
@@ -180,7 +180,7 @@ export default function ReelsPage() {
 
   if (showUpload) {
     return (
-      <div className="p-4 min-h-[calc(100vh-8rem)] bg-background">
+      <div className="p-4 min-h-screen bg-background">
         <Card className="border-0 shadow-lg max-w-lg mx-auto">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-4">
@@ -348,7 +348,7 @@ export default function ReelsPage() {
 
   if (reels.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-8rem)] bg-black p-4">
+      <div className="flex items-center justify-center h-screen bg-black p-4">
         <Card className="border-0 shadow-lg bg-white/10 backdrop-blur-sm max-w-sm w-full">
           <CardContent className="py-12 text-center">
             <div className="p-4 rounded-full bg-white/10 w-fit mx-auto mb-4">
@@ -369,19 +369,19 @@ export default function ReelsPage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[calc(100vh-8rem)] bg-black overflow-hidden"
+      className="relative h-screen bg-black overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       <Button
         onClick={() => setShowUpload(true)}
         size="icon"
-        className="absolute top-4 right-4 z-30 h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 h-12 w-12 rounded-full bg-primary backdrop-blur-sm hover:bg-primary/90 border-2 border-white"
       >
-        <Plus className="h-5 w-5 text-white" />
+        <Plus className="h-6 w-6 text-white" />
       </Button>
 
-      <div className="absolute top-4 left-4 right-16 z-30 flex gap-1">
+      {/* <div className="absolute top-4 left-4 right-4 z-30 flex gap-1">
         {reels.slice(0, 10).map((_, i) => (
           <div
             key={i}
@@ -391,7 +391,7 @@ export default function ReelsPage() {
             )}
           />
         ))}
-      </div>
+      </div> */}
 
       <div
         className="h-full transition-transform duration-300 ease-out"
@@ -403,12 +403,6 @@ export default function ReelsPage() {
           </div>
         ))}
       </div>
-
-      {currentIndex === 0 && reels.length > 1 && (
-        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-          <p className="text-white/70 text-xs">Swipe up for more</p>
-        </div>
-      )}
     </div>
   )
 }

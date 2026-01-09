@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Sparkles, Loader2, X, Send, Upload, Image } from "lucide-react"
+import { Sparkles, Loader2, X, Send, Upload, Image, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function CreatePage() {
@@ -20,6 +20,7 @@ export default function CreatePage() {
   const [uniformImage, setUniformImage] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
+  const [useUniform, setUseUniform] = useState(false)
 
   const handleGenerate = async () => {
     if (!characterImage) {
@@ -44,7 +45,7 @@ export default function CreatePage() {
       const body = {
         topic: topic,
         character_Image: characterImage,
-        uniformImage: uniformImage,
+        uniformImage: useUniform ? uniformImage : null,
       }
 
       const res = await fetch("/api/ai/generate-image", {
@@ -213,7 +214,7 @@ export default function CreatePage() {
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto space-y-8 relative z-10">
+      <div className="max-w-md mx-auto space-y-6 relative z-10 pb-20">
         {/* Header */}
         <div className="text-center pt-8 pb-6 animate-fade-in">
           <div className="flex items-center justify-center gap-4 mb-4">
@@ -228,61 +229,48 @@ export default function CreatePage() {
         </div>
 
         {/* Main Form Card */}
-        <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-lg animate-slide-up overflow-hidden">
+        <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-full blur-3xl -z-10"></div>
           
-          <CardContent className="p-8 space-y-8">
+          <CardContent className="p-5 space-y-6">
             {/* Character Image Upload - TOP */}
             <div className="space-y-4">
-              <Label className="text-xl font-bold flex items-center gap-3 text-gray-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+              <Label className="text-lg font-bold flex items-center gap-2 text-gray-800">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center shadow-md">
                   <Image className="h-5 w-5 text-white" />
                 </div>
-                Character Image
-                <span className="text-sm text-red-600 font-semibold bg-red-100 px-3 py-1 rounded-full">Required</span>
+                Character Image / Face Picture
+                <span className="text-xs text-red-600 font-semibold bg-red-100 px-2 py-0.5 rounded-full">Required</span>
               </Label>
               
               {!characterImage ? (
                 <div 
                   onClick={() => document.getElementById("gallery-input")?.click()}
-                  className="relative border-4 border-dashed border-red-300 rounded-3xl p-12 text-center cursor-pointer hover:border-red-500 hover:bg-red-50/80 transition-all group overflow-hidden"
+                  className="relative h-32 border-2 border-dashed border-red-300 rounded-2xl flex flex-col items-center justify-center bg-red-50/30 hover:bg-red-50 transition-all cursor-pointer group overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-100/50 to-pink-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative flex flex-col items-center gap-4">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
-                      <Upload className="h-12 w-12 text-white" />
+                  <div className="relative flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-red-500">
+                      <Plus className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-xl font-bold text-gray-800 mb-2">Upload Your Character</p>
-                      <p className="text-base text-gray-600">PNG, JPG or JPEG • Max 10MB</p>
-                      <p className="text-sm text-gray-500 mt-2">यहाँ क्लिक करके character image upload करें</p>
+                      <p className="text-sm font-bold text-gray-700 text-center">Upload Character</p>
+                      <p className="text-[10px] text-gray-500 text-center">Tap to select image</p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="relative rounded-3xl overflow-hidden border-4 border-red-400 shadow-2xl animate-scale-in group">
+                <div className="relative h-48 rounded-2xl overflow-hidden border-2 border-red-400 shadow-lg animate-scale-in group">
                   <img 
                     src={characterImage} 
                     alt="Character" 
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover"
                   />
                   <button
                     onClick={removeCharacterImage}
-                    className="absolute top-4 right-4 p-3 bg-red-500 rounded-full text-white hover:bg-red-600 transition-all hover:scale-110 shadow-2xl hover:rotate-90 duration-300"
+                    className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-red-600 transition-colors"
                   >
-                    <X className="h-6 w-6" />
+                    <X className="h-4 w-4" />
                   </button>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-6">
-                    <div className="flex items-center justify-between">
-                      <p className="text-white text-lg font-bold flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                        Character Ready
-                      </p>
-                      <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                        <span className="text-white text-sm font-semibold">✓ Uploaded</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -295,101 +283,117 @@ export default function CreatePage() {
               />
             </div>
 
-            {/* Uniform Image Upload - BELOW CHARACTER */}
+            {/* Uniform Toggle & Upload */}
             <div className="space-y-4">
-              <Label className="text-xl font-bold flex items-center gap-3 text-gray-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <Image className="h-5 w-5 text-white" />
-                </div>
-                Uniform / Dress Reference
-                <span className="text-sm text-gray-500 font-semibold bg-gray-100 px-3 py-1 rounded-full">Optional</span>
-              </Label>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                <input 
+                  type="checkbox" 
+                  id="useUniform"
+                  checked={useUniform}
+                  onChange={(e) => setUseUniform(e.target.checked)}
+                  className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                />
+                <Label htmlFor="useUniform" className="text-sm font-semibold text-gray-700 flex-1 cursor-pointer">
+                  Add Uniform / Dress Reference
+                  <span className="block text-xs text-gray-500 font-normal">Optional</span>
+                </Label>
+              </div>
               
-              {!uniformImage ? (
-                <div 
-                  onClick={() => document.getElementById("uniform-input")?.click()}
-                  className="relative border-4 border-dashed border-purple-300 rounded-3xl p-12 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50/80 transition-all group overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 to-indigo-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative flex flex-col items-center gap-4">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
-                      <Upload className="h-12 w-12 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xl font-bold text-gray-800 mb-2">Upload Uniform</p>
-                      <p className="text-base text-gray-600">PNG, JPG or JPEG • Max 10MB</p>
-                      <p className="text-sm text-gray-500 mt-2">Optional: Dress style reference</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative rounded-3xl overflow-hidden border-4 border-purple-400 shadow-2xl animate-scale-in group">
-                  <img 
-                    src={uniformImage} 
-                    alt="Uniform" 
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <button
-                    onClick={removeUniformImage}
-                    className="absolute top-4 right-4 p-3 bg-purple-500 rounded-full text-white hover:bg-purple-600 transition-all hover:scale-110 shadow-2xl hover:rotate-90 duration-300"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-6">
-                    <div className="flex items-center justify-between">
-                      <p className="text-white text-lg font-bold flex items-center gap-2">
-                        <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
-                        Uniform Ready
-                      </p>
-                      <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                        <span className="text-white text-sm font-semibold">✓ Uploaded</span>
+              {useUniform && (
+                <div className="animate-fade-in">
+                  {!uniformImage ? (
+                    <div 
+                      onClick={() => document.getElementById("uniform-input")?.click()}
+                      className="relative h-28 border-2 border-dashed border-purple-300 rounded-2xl flex flex-col items-center justify-center bg-purple-50/30 hover:bg-purple-50 transition-all cursor-pointer group mt-2"
+                    >
+                      <div className="relative flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-purple-500">
+                          <Plus className="h-5 w-5" />
+                        </div>
+                        <p className="text-xs font-bold text-gray-700">Add Uniform</p>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="relative h-40 rounded-2xl overflow-hidden border-2 border-purple-400 shadow-lg animate-scale-in">
+                      <img 
+                        src={uniformImage} 
+                        alt="Uniform" 
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={removeUniformImage}
+                        className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-purple-600 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                  <input 
+                    type="file" 
+                    id="uniform-input" 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={handleUniformFileChange} 
+                  >
+                  </input>
                 </div>
               )}
-
-              <input 
-                type="file" 
-                id="uniform-input" 
-                accept="image/*" 
-                className="hidden" 
-                onChange={handleUniformFileChange} 
-              />
             </div>
 
             {/* Topic Input - BELOW CHARACTER */}
             <div className="space-y-3">
-              <Label htmlFor="topic" className="text-xl font-bold flex items-center gap-3 text-gray-800">
-                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
+              <Label htmlFor="topic" className="text-lg font-bold flex items-center gap-2 text-gray-800">
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-md">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 Topic / विषय
               </Label>
-              <Input
-                id="topic"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g., Ladies Saadi, Traditional Wear, Fashion..."
-                className="h-16 text-lg font-medium border-3 border-gray-300 focus:border-red-500 rounded-2xl shadow-lg transition-all px-6"
-              />
-              <p className="text-sm text-gray-500 ml-2">आप क्या बनाना चाहते हैं? यहाँ लिखें</p>
+              <div className="relative">
+                <Input
+                  id="topic"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="e.g., Ladies Saadi, Traditional Wear..."
+                  className="h-14 text-base font-medium border-2 border-gray-200 focus:border-red-500 rounded-xl shadow-sm transition-all px-4 bg-gray-50 focus:bg-white"
+                />
+              </div>
+
+              {/* Example Prompts - Horizontal Scroll */}
+              <div className="flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-hide -mx-1 px-1">
+                {[
+                  { text: "पारंपरिक भारतीय शादी", emoji: "💒" },
+                  { text: "Traditional Wedding", emoji: "👰" },
+                  { text: "आधुनिक फैशन", emoji: "👗" },
+                  { text: "Sunset Beach", emoji: "🌅" },
+                  { text: "साड़ी में सुंदर", emoji: "🥻" },
+                  { text: "Cyberpunk Style", emoji: "🤖" },
+                ].map((example, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setTopic(example.text)}
+                    className="flex-shrink-0 text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-red-300 hover:bg-red-50 transition-all text-gray-600 whitespace-nowrap shadow-sm flex items-center gap-1.5 active:scale-95"
+                  >
+                    <span>{example.emoji}</span>
+                    {example.text}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Generate Button */}
             <Button
               onClick={handleGenerate}
               disabled={isGenerating || !topic || !characterImage}
-              className="w-full h-16 gap-4 text-xl font-bold bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 hover:from-red-700 hover:via-pink-700 hover:to-orange-700 transition-all shadow-2xl hover:shadow-red-500/50 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 rounded-2xl"
+              className="w-full h-14 gap-2 text-lg font-bold bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 hover:from-red-700 hover:via-pink-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-red-500/30 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 rounded-xl mt-2"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="h-7 w-7 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   <span className="animate-pulse">Creating Magic...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-7 w-7" />
+                  <Sparkles className="h-5 w-5" />
                   Generate AI Image
                 </>
               )}
@@ -469,37 +473,6 @@ export default function CreatePage() {
             </CardContent>
           </Card>
         )}
-
-        {/* Example Prompts */}
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-bold text-gray-700 flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-red-600" />
-              Example Ideas / उदाहरण विचार
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { text: "पारंपरिक भारतीय शादी", emoji: "💒" },
-                { text: "Traditional Wedding", emoji: "👰" },
-                { text: "आधुनिक फैशन", emoji: "👗" },
-                { text: "Sunset Beach", emoji: "🌅" },
-                { text: "साड़ी में सुंदर", emoji: "🥻" },
-                { text: "Cyberpunk Style", emoji: "🤖" },
-              ].map((example, i) => (
-                <button
-                  key={i}
-                  onClick={() => setTopic(example.text)}
-                  className="text-base bg-gradient-to-r from-red-100 to-pink-100 px-5 py-3 rounded-full hover:from-red-200 hover:to-pink-200 transition-all font-semibold text-gray-700 hover:scale-110 shadow-md hover:shadow-lg flex items-center gap-2"
-                >
-                  <span>{example.emoji}</span>
-                  {example.text}
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <style jsx>{`
