@@ -9,8 +9,6 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
-import Link from "next/link"
-
 export default function PostCard({ post, currentUserId, onUpdate }) {
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUserId))
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)

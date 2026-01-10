@@ -22,8 +22,8 @@ import {
   MessageCircle,
   UserX,
 } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { useToast } from "@/hooks/use-toast"
+import { formatDistanceToNow } from "date-fns" 
+import { useToast } from "@/components/ui/use-toast"
 import Link from "next/link"
 
 const fetcher = (url) => fetch(url).then((res) => res.json())

@@ -17,10 +17,9 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
-  const [loginMethod, setLoginMethod] = useState("email")
+  const [loginMethod, setLoginMethod] = useState("mobile")
 
   const [formData, setFormData] = useState({
-    email: "",
     mobile: "",
     password: "",
   })
@@ -32,8 +31,8 @@ export default function LoginForm() {
 
     try {
       const credentials = {
+        mobile: formData.mobile,
         password: formData.password,
-        ...(loginMethod === "email" ? { email: formData.email } : { mobile: formData.mobile }),
       }
 
       const result = await login(credentials)
@@ -66,34 +65,14 @@ export default function LoginForm() {
           </CardHeader>
 
           <CardContent>
-            <Tabs value={loginMethod} onValueChange={setLoginMethod} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="email" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </TabsTrigger>
+            <Tabs value="mobile" onValueChange={setLoginMethod} className="w-full">
+              <TabsList className="grid w-full grid-cols-1 mb-6">
                 <TabsTrigger value="mobile" className="gap-2">
                   <Phone className="h-4 w-4" />
                   Mobile
                 </TabsTrigger>
               </TabsList>
-
               <form onSubmit={handleSubmit} className="space-y-4">
-                <TabsContent value="email" className="mt-0">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required={loginMethod === "email"}
-                      className="h-12"
-                    />
-                  </div>
-                </TabsContent>
-
                 <TabsContent value="mobile" className="mt-0">
                   <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
@@ -102,8 +81,8 @@ export default function LoginForm() {
                       type="tel"
                       placeholder="+91 98765 43210"
                       value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                      required={loginMethod === "mobile"}
+                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
+                      required
                       className="h-12"
                     />
                   </div>
