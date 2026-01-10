@@ -1,0 +1,30 @@
+{
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm ci",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "env": {
+    "MONGODB_URI": {
+      "description": "MongoDB connection string"
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token generation"
+    },
+    "NEXT_PUBLIC_APP_URL": {
+      "description": "Application URL for production"
+    }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "regions": ["iad1"],
+  "functions": {
+    "api/**": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  }
+}

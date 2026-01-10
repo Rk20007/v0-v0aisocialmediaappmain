@@ -23,6 +23,7 @@ import {
   VolumeX,
   Camera,
   CheckCircle2,
+  Bookmark,
 } from "lucide-react"
 import { cn } from "@/lib/utils" 
 import { useToast } from "@/components/use-toast"
@@ -38,30 +39,32 @@ export default function ReelsPage() {
   })
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showUpload, setShowUpload] = useState(false)
-  const [uploadStatus, setUploadStatus] = useState("idle") // 'idle' | 'uploading' | 'processing' | 'posted' | 'error'
+  const [uploadStatus, setUploadStatus] = useState("idle")
   const [uploadProgress, setUploadProgress] = useState(0)
   const [caption, setCaption] = useState("")
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState("")
   const fileInputRef = useRef(null)
   const containerRef = useRef(null)
-  const touchStartY = useRef(0)
+  const scrollVelocityRef = useRef(0)
+  const lastYRef = useRef(0)
 
   const reels = data?.reels || []
 
   const handleTouchStart = (e) => {
-    touchStartY.current = e.touches[0].clientY
+    lastYRef.current = e.touches[0].clientY
   }
 
   const handleTouchEnd = (e) => {
     const touchEndY = e.changedTouches[0].clientY
-    const diff = touchStartY.current - touchEndY
+    const diff = lastYRef.current - touchEndY
+    scrollVelocityRef.current = diff
 
-    if (Math.abs(diff) > 50) {
+    if (Math.abs(diff) > 30) {
       if (diff > 0 && currentIndex < reels.length - 1) {
-        setCurrentIndex((prev) => prev + 1)
+        setCurrentIndex((prev) => Math.min(prev + 1, reels.length - 1))
       } else if (diff < 0 && currentIndex > 0) {
-        setCurrentIndex((prev) => prev - 1)
+        setCurrentIndex((prev) => Math.max(prev - 1, 0))
       }
     }
   }
@@ -69,9 +72,9 @@ export default function ReelsPage() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowDown" && currentIndex < reels.length - 1) {
-        setCurrentIndex((prev) => prev + 1)
+        setCurrentIndex((prev) => Math.min(prev + 1, reels.length - 1))
       } else if (e.key === "ArrowUp" && currentIndex > 0) {
-        setCurrentIndex((prev) => prev - 1)
+        setCurrentIndex((prev) => Math.max(prev - 1, 0))
       }
     }
 
@@ -172,20 +175,25 @@ export default function ReelsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-black">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      <div className="flex items-center justify-center h-[calc(100vh-8rem)] bg-gradient-to-b from-slate-950 to-black">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-white mb-4 mx-auto" />
+          <p className="text-white/60">Loading reels...</p>
+        </div>
       </div>
     )
   }
 
   if (showUpload) {
     return (
-      <div className="p-4 min-h-screen bg-background">
-        <Card className="border-0 shadow-lg max-w-lg mx-auto">
+      <div className="p-4 min-h-[calc(100vh-8rem)] bg-gradient-to-b from-slate-950 to-black">
+        <Card className="border-0 shadow-2xl max-w-lg mx-auto bg-slate-900 border-slate-700">
           <CardContent className="pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Film className="h-5 w-5 text-primary" />
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold flex items-center gap-3 text-white">
+                <div className="p-2 bg-red-500/20 rounded-lg">
+                  <Film className="h-5 w-5 text-red-500" />
+                </div>
                 Create New Reel
               </h2>
               <Button
@@ -204,19 +212,21 @@ export default function ReelsPage() {
                   setPreviewUrl("")
                   setUploadStatus("idle")
                 }}
+                className="hover:bg-slate-700"
                 disabled={uploadStatus === "uploading" || uploadStatus === "processing"}
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-white" />
               </Button>
             </div>
 
-            <form onSubmit={handleUploadReel} className="space-y-4">
+            <form onSubmit={handleUploadReel} className="space-y-5">
               <div
                 onClick={() => !selectedFile && uploadStatus === "idle" && fileInputRef.current?.click()}
                 className={cn(
-                  "relative aspect-[9/16] max-h-[400px] rounded-xl overflow-hidden border-2 border-dashed transition-all",
-                  selectedFile ? "border-primary bg-black" : "border-muted-foreground/30 bg-muted/50",
-                  uploadStatus === "idle" && !selectedFile && "cursor-pointer hover:border-primary/50",
+                  "relative aspect-[9/16] max-h-[500px] rounded-2xl overflow-hidden border-2 border-dashed transition-all cursor-pointer",
+                  selectedFile
+                    ? "border-red-500/50 bg-black/40"
+                    : "border-slate-600 bg-slate-900/40 hover:border-red-500/50",
                 )}
               >
                 {previewUrl ? (
@@ -227,7 +237,7 @@ export default function ReelsPage() {
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="absolute top-2 right-2"
+                        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600"
                         onClick={(e) => {
                           e.stopPropagation()
                           setSelectedFile(null)
@@ -240,21 +250,21 @@ export default function ReelsPage() {
                     )}
 
                     {uploadStatus === "posted" && (
-                      <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center rounded-2xl">
                         <div className="text-center">
-                          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-2 animate-bounce" />
-                          <p className="text-white font-semibold">Posted Successfully!</p>
+                          <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-3 animate-bounce" />
+                          <p className="text-white font-bold text-lg">Posted Successfully!</p>
                         </div>
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
-                    <div className="p-4 rounded-full bg-primary/10 mb-3">
-                      <Camera className="h-10 w-10 text-primary" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                    <div className="p-4 rounded-full bg-red-500/10 mb-4">
+                      <Camera className="h-12 w-12 text-red-500" />
                     </div>
-                    <p className="font-medium">Tap to select video</p>
-                    <p className="text-sm text-muted-foreground">MP4, WebM up to 100MB</p>
+                    <p className="font-semibold text-white">Tap to select video</p>
+                    <p className="text-sm">MP4, WebM up to 100MB</p>
                   </div>
                 )}
               </div>
@@ -269,72 +279,71 @@ export default function ReelsPage() {
               />
 
               <div>
-                <label className="text-sm font-medium mb-2 block">Caption</label>
+                <label className="text-sm font-semibold mb-2 block text-white">Caption</label>
                 <Textarea
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  placeholder="Write a caption for your reel..."
+                  placeholder="Add a caption to your reel..."
                   rows={3}
                   maxLength={500}
                   disabled={uploadStatus !== "idle"}
+                  className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 resize-none rounded-xl"
                 />
-                <p className="text-xs text-muted-foreground mt-1 text-right">{caption.length}/500</p>
+                <p className="text-xs text-slate-400 mt-2 text-right">{caption.length}/500</p>
               </div>
 
               {(uploadStatus === "uploading" || uploadStatus === "processing" || uploadStatus === "posted") && (
-                <div className="space-y-2">
-                  <Progress value={uploadProgress} className="h-2" />
+                <div className="space-y-3 bg-slate-800/50 p-4 rounded-xl">
+                  <Progress value={uploadProgress} className="h-2 bg-slate-700" />
                   <div className="flex items-center justify-center gap-2">
                     {uploadStatus === "uploading" && (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        <p className="text-sm text-muted-foreground">Uploading video...</p>
+                        <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+                        <p className="text-sm text-slate-400">Uploading video...</p>
                       </>
                     )}
                     {uploadStatus === "processing" && (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                        <p className="text-sm text-muted-foreground">Creating reel...</p>
+                        <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+                        <p className="text-sm text-slate-400">Processing reel...</p>
                       </>
                     )}
                     {uploadStatus === "posted" && (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">Reel posted!</p>
+                        <p className="text-sm text-green-400 font-medium">Reel posted!</p>
                       </>
                     )}
                   </div>
-                  <p className="text-xs text-center text-muted-foreground">{uploadProgress}% complete</p>
+                  <p className="text-xs text-center text-slate-400">{uploadProgress}% complete</p>
                 </div>
               )}
 
               {uploadStatus === "error" && (
-                <Badge variant="destructive" className="w-full justify-center py-2">
+                <Badge variant="destructive" className="w-full justify-center py-2 bg-red-900">
                   Upload failed. Please try again.
                 </Badge>
               )}
 
               <Button
                 type="submit"
-                className="w-full gap-2"
-                disabled={
-                  uploadStatus !== "idle" || !selectedFile || uploadStatus === "uploading" || uploadStatus === "posted"
-                }
+                className="w-full h-12 text-lg font-semibold bg-red-500 hover:bg-red-600 text-white"
+                disabled={uploadStatus !== "idle" || !selectedFile}
                 size="lg"
               >
                 {uploadStatus === "uploading" || uploadStatus === "processing" ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     {uploadStatus === "uploading" ? "Uploading..." : "Processing..."}
                   </>
                 ) : uploadStatus === "posted" ? (
                   <>
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
                     Posted!
                   </>
                 ) : (
                   <>
-                    <Upload className="h-4 w-4" />
+                    <Upload className="h-4 w-4 mr-2" />
                     Share Reel
                   </>
                 )}
@@ -354,9 +363,13 @@ export default function ReelsPage() {
             <div className="p-4 rounded-full bg-white/10 w-fit mx-auto mb-4">
               <Film className="h-12 w-12 text-white" />
             </div>
-            <p className="text-white font-semibold mb-2">No reels yet</p>
-            <p className="text-white/70 text-sm mb-6">Be the first to share a reel!</p>
-            <Button onClick={() => setShowUpload(true)} size="lg" className="gap-2">
+            <p className="text-white font-bold text-lg mb-2">No reels yet</p>
+            <p className="text-slate-400 text-sm mb-8">Be the first to share a reel!</p>
+            <Button
+              onClick={() => setShowUpload(true)}
+              size="lg"
+              className="gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold"
+            >
               <Plus className="h-5 w-5" />
               Create Reel
             </Button>
@@ -369,36 +382,39 @@ export default function ReelsPage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-screen bg-black overflow-hidden"
+      className="relative h-[calc(100vh-8rem)] bg-black overflow-hidden snap-y snap-mandatory"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <Button
-        onClick={() => setShowUpload(true)}
-        size="icon"
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 h-12 w-12 rounded-full bg-primary backdrop-blur-sm hover:bg-primary/90 border-2 border-white"
-      >
-        <Plus className="h-6 w-6 text-white" />
-      </Button>
-
-      {/* <div className="absolute top-4 left-4 right-4 z-30 flex gap-1">
+      {/* Header Progress Indicators */}
+      <div className="absolute top-4 left-4 right-16 z-30 flex gap-1">
         {reels.slice(0, 10).map((_, i) => (
           <div
             key={i}
             className={cn(
-              "h-1 flex-1 rounded-full transition-all duration-300",
-              i === currentIndex ? "bg-white" : "bg-white/30",
+              "h-1 flex-1 rounded-full transition-all duration-300 backdrop-blur-sm",
+              i === currentIndex ? "bg-red-500" : "bg-white/20",
             )}
           />
         ))}
-      </div> */}
+      </div> 
 
+      {/* Create Button */}
+      <Button
+        onClick={() => setShowUpload(true)}
+        size="icon"
+        className="absolute top-4 right-4 z-30 h-12 w-12 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
+
+      {/* Video Container */}
       <div
-        className="h-full transition-transform duration-300 ease-out"
+        className="h-full transition-transform duration-500 ease-out"
         style={{ transform: `translateY(-${currentIndex * 100}%)` }}
       >
         {reels.map((reel, index) => (
-          <div key={reel._id} className="h-full">
+          <div key={reel._id} className="h-full snap-start">
             <ReelCard reel={reel} isActive={index === currentIndex} currentUserId={user?._id} onMutate={mutate} />
           </div>
         ))}
@@ -411,6 +427,7 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   const { toast } = useToast()
   const [liked, setLiked] = useState(reel.likes?.includes(currentUserId))
   const [likesCount, setLikesCount] = useState(reel.likes?.length || 0)
+  const [bookmarked, setBookmarked] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [showHeart, setShowHeart] = useState(false)
@@ -424,12 +441,8 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
       videoRef.current.currentTime = 0
       videoRef.current
         .play()
-        .then(() => {
-          setIsPlaying(true)
-        })
-        .catch(() => {
-          setIsPlaying(false)
-        })
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false))
     } else {
       videoRef.current.pause()
       setIsPlaying(false)
@@ -462,7 +475,7 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
       if (!liked) {
         handleLike()
         setShowHeart(true)
-        setTimeout(() => setShowHeart(false), 1000)
+        setTimeout(() => setShowHeart(false), 600)
       }
     } else {
       togglePlay()
@@ -495,7 +508,7 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
         })
       } else {
         await navigator.clipboard.writeText(window.location.href)
-        toast({ title: "Link copied!" })
+        toast({ title: "Link copied to clipboard!" })
       }
     } catch (error) {
       // User cancelled share
@@ -503,7 +516,7 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   }
 
   return (
-    <div className="h-full relative bg-black">
+    <div className="h-full relative bg-black group">
       {/* Video */}
       <div className="absolute inset-0" onClick={handleTap}>
         {reel.videoUrl ? (
@@ -517,84 +530,97 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
             poster={reel.thumbnail}
             preload="auto"
           />
-        ) : reel.thumbnail ? (
-          <img src={reel.thumbnail || "/placeholder.svg"} alt="Reel" className="w-full h-full object-contain" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Film className="h-16 w-16 text-white/30" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-slate-900 to-black">
+            <Film className="h-20 w-20 text-white/20" />
           </div>
         )}
 
         {!isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
-            <div className="p-4 rounded-full bg-white/20 backdrop-blur-sm">
-              <Play className="h-12 w-12 text-white fill-white" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none backdrop-blur-sm">
+            <div className="p-4 rounded-full bg-white/20 backdrop-blur-md">
+              <Play className="h-16 w-16 text-white fill-white" />
             </div>
           </div>
         )}
 
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart className="h-24 w-24 text-white fill-white animate-ping" />
+            <Heart className="h-28 w-28 text-red-500 fill-red-500 animate-ping" />
           </div>
         )}
       </div>
 
       {/* Gradient Overlays */}
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
 
       {/* Mute Button */}
       <button
         onClick={toggleMute}
-        className="absolute top-16 right-4 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-sm"
+        className="absolute top-20 right-4 z-20 p-3 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 transition-all"
       >
-        {isMuted ? <VolumeX className="h-5 w-5 text-white" /> : <Volume2 className="h-5 w-5 text-white" />}
+        {isMuted ? <VolumeX className="h-6 w-6 text-white" /> : <Volume2 className="h-6 w-6 text-white" />}
       </button>
 
-      <div className="absolute right-3 bottom-32 flex flex-col items-center gap-5 z-20">
-        <button onClick={handleLike} className="flex flex-col items-center gap-1">
-          <div
-            className={cn(
-              "p-3 rounded-full transition-colors",
-              liked ? "bg-red-500/20" : "bg-black/40 backdrop-blur-sm",
-            )}
-          >
-            <Heart
-              className={cn("h-7 w-7 transition-all", liked ? "fill-red-500 text-red-500 scale-110" : "text-white")}
-            />
+      {/* User Info & Actions */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-4">
+        <div className="flex items-end justify-between">
+          {/* Left: User Info */}
+          <div className="flex items-center gap-3 flex-1">
+            <Avatar className="h-12 w-12 border-2 border-white/30">
+              <AvatarImage src={reel.user?.avatar || "/placeholder.svg"} alt={reel.user?.name} />
+              <AvatarFallback className="bg-red-500/30 text-white">{reel.user?.name?.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <Link href={`/profile/${reel.user?._id}`}>
+                <p className="font-bold text-white hover:text-red-400 transition">{reel.user?.name}</p>
+              </Link>
+              {reel.caption && <p className="text-white/70 text-sm line-clamp-2">{reel.caption}</p>}
+            </div>
           </div>
-          <span className="text-white text-xs font-medium">{likesCount}</span>
-        </button>
 
-        <button className="flex flex-col items-center gap-1">
-          <div className="p-3 rounded-full bg-black/40 backdrop-blur-sm">
-            <MessageCircle className="h-7 w-7 text-white" />
+          {/* Right: Action Buttons */}
+          <div className="flex flex-col items-center gap-6 ml-4">
+            <button onClick={handleLike} className="flex flex-col items-center gap-2 group">
+              <div
+                className={cn(
+                  "p-3 rounded-full transition-all duration-200",
+                  liked ? "bg-red-500/30 scale-110" : "bg-white/10 hover:bg-white/20",
+                )}
+              >
+                <Heart className={cn("h-7 w-7 transition-all", liked ? "fill-red-500 text-red-500" : "text-white")} />
+              </div>
+              <span className="text-white text-xs font-semibold">{likesCount}</span>
+            </button>
+
+            <button className="flex flex-col items-center gap-2 group">
+              <div className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all">
+                <MessageCircle className="h-7 w-7 text-white" />
+              </div>
+              <span className="text-white text-xs font-semibold">{reel.comments?.length || 0}</span>
+            </button>
+
+            <button onClick={handleShare} className="flex flex-col items-center gap-2 group">
+              <div className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all">
+                <Share2 className="h-7 w-7 text-white" />
+              </div>
+              <span className="text-white text-xs font-semibold">Share</span>
+            </button>
+
+            <button onClick={() => setBookmarked(!bookmarked)} className="flex flex-col items-center gap-2 group">
+              <div
+                className={cn(
+                  "p-3 rounded-full transition-all",
+                  bookmarked ? "bg-yellow-500/30" : "bg-white/10 hover:bg-white/20",
+                )}
+              >
+                <Bookmark className={cn("h-7 w-7", bookmarked ? "fill-yellow-500 text-yellow-500" : "text-white")} />
+              </div>
+              <span className="text-white text-xs font-semibold">Save</span>
+            </button>
           </div>
-          <span className="text-white text-xs font-medium">{reel.comments?.length || 0}</span>
-        </button>
-
-        <button onClick={handleShare} className="flex flex-col items-center gap-1">
-          <div className="p-3 rounded-full bg-black/40 backdrop-blur-sm">
-            <Share2 className="h-7 w-7 text-white" />
-          </div>
-          <span className="text-white text-xs font-medium">Share</span>
-        </button>
-
-        <Link href={`/user/${reel.userId}`}>
-          <Avatar className="h-12 w-12 border-2 border-white ring-2 ring-primary">
-            <AvatarImage src={reel.user?.avatar || "/placeholder.svg"} />
-            <AvatarFallback className="bg-primary text-white">{reel.user?.name?.charAt(0)}</AvatarFallback>
-          </Avatar>
-        </Link>
-      </div>
-
-      {/* User Info & Caption */}
-      <div className="absolute left-4 right-20 bottom-8 z-20">
-        <Link href={`/user/${reel.userId}`}>
-          <p className="text-white font-bold text-base mb-1">@{reel.user?.name?.toLowerCase().replace(/\s/g, "")}</p>
-        </Link>
-        {reel.caption && <p className="text-white/90 text-sm line-clamp-2">{reel.caption}</p>}
+        </div>
       </div>
     </div>
   )

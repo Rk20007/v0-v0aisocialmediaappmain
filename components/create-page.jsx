@@ -17,7 +17,6 @@ export default function CreatePage() {
   const [tags, setTags] = useState("")
   const [imageSrc, setImageSrc] = useState("")
   const [characterImage, setCharacterImage] = useState("")
-  const [uniformImage, setUniformImage] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
   const [useUniform, setUseUniform] = useState(false)
@@ -151,27 +150,6 @@ export default function CreatePage() {
   const removeCharacterImage = () => {
     setCharacterImage("")
     const input = document.getElementById("gallery-input")
-    if (input) input.value = ""
-  }
-
-  const handleUniformFileChange = (e) => {
-    const file = e.target.files?.[0]
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader()
-      reader.onload = (ev) => {
-        setUniformImage(ev.target?.result)
-        toast({
-          title: "✓ Uniform Selected",
-          description: "Image upload successful",
-        })
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const removeUniformImage = () => {
-    setUniformImage("")
-    const input = document.getElementById("uniform-input")
     if (input) input.value = ""
   }
 
