@@ -200,7 +200,7 @@ export default function CreatePage() {
               <Sparkles className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-5xl font-black bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
-              Color Code
+              colorCode
             </h1>
           </div>
           <p className="text-gray-600 text-xl font-medium">AI के साथ अपना creative vision बनाएं</p>
