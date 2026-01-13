@@ -4,23 +4,20 @@
   "installCommand": "npm ci",
   "framework": "nextjs",
   "outputDirectory": ".next",
+
   "env": {
-    "MONGODB_URI": {
-      "description": "MongoDB connection string"
-    },
-    "JWT_SECRET": {
-      "description": "Secret key for JWT token generation"
-    },
-    "NEXT_PUBLIC_APP_URL": {
-      "description": "Application URL for production"
-    }
+    "MONGODB_URI": "mongodb+srv://khanrobin7071:Robin54321@cluster0.eea47yy.mongodb.net/",
+    "JWT_SECRET": "12345"
   },
+
   "git": {
     "deploymentEnabled": {
       "main": true
     }
   },
+
   "regions": ["iad1"],
+
   "functions": {
     "api/**": {
       "memory": 1024,
