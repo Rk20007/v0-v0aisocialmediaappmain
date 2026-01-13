@@ -1,25 +1,92 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Sparkles, Loader2, X, Send, Upload, Image, Plus } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Sparkles, Loader2, X, Send, Image, Plus, Camera, FolderOpen, Download, Edit, Share2, ChevronDown } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export default function CreatePage() {
   const router = useRouter()
   const { toast } = useToast()
   const [topic, setTopic] = useState("")
+  const [manualPrompt, setManualPrompt] = useState("")
   const [caption, setCaption] = useState("")
   const [tags, setTags] = useState("")
   const [imageSrc, setImageSrc] = useState("")
   const [characterImage, setCharacterImage] = useState("")
+  const [uniformImageSrc, setUniformImageSrc] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
   const [useUniform, setUseUniform] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
+
+  // Load saved data from memory on mount
+  useEffect(() => {
+    const savedImage = sessionStorage.getItem('generatedImage')
+    const savedCaption = sessionStorage.getItem('imageCaption')
+    const savedTags = sessionStorage.getItem('imageTags')
+    
+    if (savedImage) setImageSrc(savedImage)
+    if (savedCaption) setCaption(savedCaption)
+    if (savedTags) setTags(savedTags)
+  }, [])
+
+  // Save to memory whenever image changes
+  useEffect(() => {
+    if (imageSrc) {
+      sessionStorage.setItem('generatedImage', imageSrc)
+    }
+  }, [imageSrc])
+
+  useEffect(() => {
+    if (caption) sessionStorage.setItem('imageCaption', caption)
+  }, [caption])
+
+  useEffect(() => {
+    if (tags) sessionStorage.setItem('imageTags', tags)
+  }, [tags])
+
+  // Combined prompts for single dropdown
+  const allPrompts = [
+    { category: "Women - महिला", prompts: [
+      "पारंपरिक लाल साड़ी में सुंदर दुल्हन",
+      "शादी की रस्म में गहरे रंग की साड़ी",
+      "पीले रंग की मेहंदी सूट में खूबसूरत लड़की",
+      "गुलाबी लहंगा चोली में दुल्हन",
+      "सुनहरी बॉर्डर वाली रेड साड़ी",
+      "नीली साड़ी में देसी लुक",
+      "हरे रंग का स्टाइलिश सलवार सूट",
+      "मरून लहंगा में शादी का लुक",
+      "ऑरेंज साड़ी में ट्रेडिशनल स्टाइल",
+      "सफेद और गोल्ड साड़ी में एलिगेंट लुक",
+      "पिंक पार्टी ड्रेस में मॉडर्न लुक",
+      "काली साड़ी में बोल्ड अवतार",
+      "बैंगनी लहंगा में संगीत सेरेमनी",
+      "फिरोजी सूट में कैजुअल लुक",
+      "गोल्डन साड़ी में फेस्टिवल लुक"
+    ]},
+    { category: "Men - पुरुष", prompts: [
+      "सफेद शेरवानी में हैंडसम दूल्हा",
+      "क्रीम कलर का शेरवानी लुक",
+      "गोल्डन शेरवानी में शाही अंदाज",
+      "नेवी ब्लू सूट में स्मार्ट लुक",
+      "मरून शेरवानी में शादी का लुक",
+      "काला कुर्ता पजामा में देसी स्टाइल",
+      "ऑफ-व्हाइट कुर्ता में ट्रेडिशनल लुक",
+      "ब्राउन शेरवानी में एलिगेंट स्टाइल",
+      "पिंक शेरवानी में मॉडर्न दूल्हा",
+      "ग्रे सूट में फॉर्मल लुक",
+      "सफेद कुर्ता पायजामा में सिंपल लुक",
+      "बेज शेरवानी में संगीत सेरेमनी",
+      "ब्लैक टक्सीडो में वेस्टर्न लुक",
+      "आइवरी शेरवानी में रॉयल स्टाइल",
+      "डार्क ब्लू कुर्ता में कैजुअल लुक"
+    ]}
+  ]
 
   const handleGenerate = async () => {
     if (!characterImage) {
@@ -30,21 +97,25 @@ export default function CreatePage() {
       })
       return
     }
-    if (!topic.trim()) {
+
+    const finalPrompt = manualPrompt.trim() || topic.trim()
+    
+    if (!finalPrompt) {
       toast({
-        title: "Topic Required",
-        description: "कृपया एक topic enter करें",
+        title: "Prompt Required",
+        description: "कृपया एक prompt select या लिखें",
         variant: "destructive",
       })
       return
     }
 
     setIsGenerating(true)
+    setShowEditForm(false)
     try {
       const body = {
-        topic: topic,
+        topic: finalPrompt,
         character_Image: characterImage,
-        uniformImage: useUniform ? uniformImage : null,
+        uniformImage: useUniform ? uniformImageSrc : null,
       }
 
       const res = await fetch("/api/ai/generate-image", {
@@ -113,6 +184,10 @@ export default function CreatePage() {
           title: "🎉 Posted!",
           description: "आपकी creation अब live है",
         })
+        // Clear saved data after successful post
+        sessionStorage.removeItem('generatedImage')
+        sessionStorage.removeItem('imageCaption')
+        sessionStorage.removeItem('imageTags')
         router.push("/feed")
       } else {
         toast({
@@ -153,28 +228,116 @@ export default function CreatePage() {
     if (input) input.value = ""
   }
 
+  const handleUniformFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        setUniformImageSrc(ev.target?.result)
+        toast({
+          title: "✓ Uniform Selected",
+          description: "Uniform reference uploaded",
+        })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeUniformImage = () => {
+    setUniformImageSrc("")
+    const input = document.getElementById("uniform-input")
+    if (input) input.value = ""
+  }
+
+  const handleDownload = async () => {
+    if (!imageSrc) return
+    
+    try {
+      // Fetch the image as blob
+      const response = await fetch(imageSrc)
+      const blob = await response.blob()
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `blue-class-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
+      toast({
+        title: "Downloaded! ✓",
+        description: "Image saved successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Unable to download image",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleShare = async () => {
+    if (navigator.share && imageSrc) {
+      try {
+        await navigator.share({
+          title: 'Blue Class AI Creation',
+          text: caption || 'Check out my AI-generated image!',
+          url: imageSrc
+        })
+      } catch (err) {
+        toast({
+          title: "Share",
+          description: "Unable to share at this moment",
+        })
+      }
+    } else {
+      toast({
+        title: "Share",
+        description: "Share feature not available",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEdit = () => {
+    setShowEditForm(true)
+  }
+
+  const clearAllData = () => {
+    sessionStorage.removeItem('generatedImage')
+    sessionStorage.removeItem('imageCaption')
+    sessionStorage.removeItem('imageTags')
+    setImageSrc("")
+    setCaption("")
+    setTags("")
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 p-4 relative overflow-hidden">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-red-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-        <div className="absolute top-40 right-10 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-orange-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
+        <div className="absolute top-40 right-10 w-96 h-96 bg-indigo-500 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Generating Popup Modal */}
       {isGenerating && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in">
-          <div className="bg-white rounded-3xl p-10 max-w-md mx-4 text-center shadow-2xl animate-scale-in border-4 border-red-200">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in">
+          <div className="bg-white rounded-3xl p-10 max-w-md mx-4 text-center shadow-2xl animate-scale-in border-4 border-blue-300">
             <div className="mb-8 relative">
-              <div className="w-32 h-32 mx-auto bg-gradient-to-br from-red-500 via-pink-500 to-orange-500 rounded-full flex items-center justify-center animate-pulse-scale shadow-2xl">
+              <div className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-full flex items-center justify-center animate-pulse-scale shadow-2xl">
                 <Sparkles className="h-16 w-16 text-white animate-spin-slow" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-40 h-40 border-4 border-red-300 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-40 h-40 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
               </div>
             </div>
-            <h3 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-4">
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent mb-4">
               Generating Image
             </h3>
             <p className="text-xl font-semibold text-gray-700 mb-2">
@@ -184,71 +347,95 @@ export default function CreatePage() {
               Please wait, creating magic ✨
             </p>
             <div className="flex gap-3 justify-center">
-              <div className="w-4 h-4 bg-red-500 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-4 h-4 bg-pink-500 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-4 h-4 bg-orange-500 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '300ms' }}></div>
+              <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-4 h-4 bg-indigo-600 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-4 h-4 bg-blue-700 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '300ms' }}></div>
             </div>
           </div>
         </div>
       )}
 
       <div className="max-w-md mx-auto space-y-6 relative z-10 pb-20">
-        {/* Header */}
-        <div className="text-center pt-8 pb-6 animate-fade-in">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-red-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-xl rotate-12 animate-float">
-              <Sparkles className="h-8 w-8 text-white" />
-            </div>
-            <h1 className="text-5xl font-black bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
-              colorCode
-            </h1>
-          </div>
-          <p className="text-gray-600 text-xl font-medium">AI के साथ अपना creative vision बनाएं</p>
-        </div>
-
         {/* Main Form Card */}
-        <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-red-400/20 to-pink-400/20 rounded-full blur-3xl -z-10"></div>
-          
-          <CardContent className="p-5 space-y-6">
-            {/* Character Image Upload - TOP */}
+        {!imageSrc && (
+        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl mt-8">
+          <CardContent className="p-6 space-y-6">
+            {/* Character Image Upload */}
             <div className="space-y-4">
               <Label className="text-lg font-bold flex items-center gap-2 text-gray-800">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center shadow-md">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
                   <Image className="h-5 w-5 text-white" />
                 </div>
-                Character Image / Face Picture
-                <span className="text-xs text-red-600 font-semibold bg-red-100 px-2 py-0.5 rounded-full">Required</span>
+                Face Picture
+                <span className="text-xs text-blue-700 font-semibold bg-blue-100 px-2 py-0.5 rounded-full">Required</span>
               </Label>
               
               {!characterImage ? (
-                <div 
-                  onClick={() => document.getElementById("gallery-input")?.click()}
-                  className="relative h-32 border-2 border-dashed border-red-300 rounded-2xl flex flex-col items-center justify-center bg-red-50/30 hover:bg-red-50 transition-all cursor-pointer group overflow-hidden"
-                >
-                  <div className="relative flex flex-col items-center gap-2">
-                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-red-500">
-                      <Plus className="h-6 w-6" />
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-40 h-40 rounded-full border-4 border-dashed border-blue-400 bg-blue-50 flex items-center justify-center shadow-inner">
+                    <div className="text-center">
+                      <Camera className="h-12 w-12 text-blue-500 mx-auto mb-2" />
+                      <p className="text-xs text-gray-600 font-medium">Preview</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-700 text-center">Upload Character</p>
-                      <p className="text-[10px] text-gray-500 text-center">Tap to select image</p>
-                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <button
+                      onClick={() => document.getElementById("gallery-input")?.click()}
+                      className="flex flex-col items-center gap-2 p-4 border-2 border-blue-400 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-all active:scale-95 shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
+                        <FolderOpen className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-sm font-bold text-gray-800">Gallery</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => document.getElementById("gallery-input")?.click()}
+                      className="flex flex-col items-center gap-2 p-4 border-2 border-indigo-400 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 transition-all active:scale-95 shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg">
+                        <Camera className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-sm font-bold text-gray-800">Selfie</span>
+                    </button>
                   </div>
                 </div>
               ) : (
-                <div className="relative h-48 rounded-2xl overflow-hidden border-2 border-red-400 shadow-lg animate-scale-in group">
-                  <img 
-                    src={characterImage} 
-                    alt="Character" 
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    onClick={removeCharacterImage}
-                    className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-red-600 transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="relative">
+                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-blue-500 shadow-xl animate-scale-in">
+                      <img 
+                        src={characterImage} 
+                        alt="Character" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <button
+                      onClick={removeCharacterImage}
+                      className="absolute top-0 right-0 p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors shadow-lg z-10"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <button
+                      onClick={() => document.getElementById("gallery-input")?.click()}
+                      className="flex items-center justify-center gap-2 p-3 border-2 border-blue-400 rounded-xl bg-white hover:bg-blue-50 transition-all text-sm font-semibold text-gray-800 shadow-sm"
+                    >
+                      <FolderOpen className="h-4 w-4 text-blue-600" />
+                      Change
+                    </button>
+                    
+                    <button
+                      onClick={() => document.getElementById("gallery-input")?.click()}
+                      className="flex items-center justify-center gap-2 p-3 border-2 border-indigo-400 rounded-xl bg-white hover:bg-indigo-50 transition-all text-sm font-semibold text-gray-800 shadow-sm"
+                    >
+                      <Camera className="h-4 w-4 text-indigo-600" />
+                      Retake
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -263,44 +450,46 @@ export default function CreatePage() {
 
             {/* Uniform Toggle & Upload */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-sm">
                 <input 
                   type="checkbox" 
                   id="useUniform"
                   checked={useUniform}
                   onChange={(e) => setUseUniform(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  className="w-5 h-5 rounded border-gray-300 text-blue-700 focus:ring-blue-600"
                 />
-                <Label htmlFor="useUniform" className="text-sm font-semibold text-gray-700 flex-1 cursor-pointer">
+                <Label htmlFor="useUniform" className="text-sm font-semibold text-gray-800 flex-1 cursor-pointer">
                   Add Uniform / Dress Reference
-                  <span className="block text-xs text-gray-500 font-normal">Optional</span>
+                  <span className="block text-xs text-gray-600 font-normal">Optional</span>
                 </Label>
               </div>
               
               {useUniform && (
                 <div className="animate-fade-in">
-                  {!uniformImage ? (
+                  {!uniformImageSrc ? (
                     <div 
                       onClick={() => document.getElementById("uniform-input")?.click()}
-                      className="relative h-28 border-2 border-dashed border-purple-300 rounded-2xl flex flex-col items-center justify-center bg-purple-50/30 hover:bg-purple-50 transition-all cursor-pointer group mt-2"
+                      className="relative h-28 border-2 border-dashed border-blue-400 rounded-2xl flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer group mt-2 shadow-inner"
                     >
                       <div className="relative flex flex-col items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-purple-500">
+                        <div className="w-10 h-10 rounded-full bg-blue-600 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform text-white">
                           <Plus className="h-5 w-5" />
                         </div>
-                        <p className="text-xs font-bold text-gray-700">Add Uniform</p>
+                        <p className="text-xs font-bold text-gray-800">Add Uniform</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="relative h-40 rounded-2xl overflow-hidden border-2 border-purple-400 shadow-lg animate-scale-in">
-                      <img 
-                        src={uniformImage} 
-                        alt="Uniform" 
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="relative group">
+                      <div className="h-40 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-lg animate-scale-in">
+                        <img 
+                          src={uniformImageSrc} 
+                          alt="Uniform" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <button
                         onClick={removeUniformImage}
-                        className="absolute top-2 right-2 p-2 bg-black/50 rounded-full text-white hover:bg-purple-600 transition-colors"
+                        className="absolute -top-2 -right-2 p-2 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors shadow-lg z-10"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -312,142 +501,280 @@ export default function CreatePage() {
                     accept="image/*" 
                     className="hidden" 
                     onChange={handleUniformFileChange} 
-                  >
-                  </input>
+                  />
                 </div>
               )}
             </div>
 
-            {/* Topic Input - BELOW CHARACTER */}
+            {/* Single Unified Prompt Dropdown */}
             <div className="space-y-3">
-              <Label htmlFor="topic" className="text-lg font-bold flex items-center gap-2 text-gray-800">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-md">
+              <Label htmlFor="prompt-dropdown" className="text-lg font-bold flex items-center gap-2 text-gray-800">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
-                Topic / विषय
+                Select Style Prompt
               </Label>
               <div className="relative">
-                <Input
-                  id="topic"
+                <select
+                  id="prompt-dropdown"
                   value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g., Ladies Saadi, Traditional Wear..."
-                  className="h-14 text-base font-medium border-2 border-gray-200 focus:border-red-500 rounded-xl shadow-sm transition-all px-4 bg-gray-50 focus:bg-white"
-                />
+                  onChange={(e) => {
+                    setTopic(e.target.value)
+                    setManualPrompt("")
+                  }}
+                  className="w-full h-14 text-base font-medium border-2 border-gray-300 focus:border-blue-600 rounded-xl shadow-sm transition-all px-4 pr-10 bg-white appearance-none cursor-pointer"
+                >
+                  <option value="">-- Select a Style --</option>
+                  {allPrompts.map((category) => (
+                    <optgroup key={category.category} label={category.category}>
+                      {category.prompts.map((prompt, idx) => (
+                        <option key={idx} value={prompt}>{prompt}</option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
               </div>
+            </div>
 
-              {/* Example Prompts - Horizontal Scroll */}
-              <div className="flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-hide -mx-1 px-1">
-                {[
-                  { text: "पारंपरिक भारतीय शादी", emoji: "💒" },
-                  { text: "Traditional Wedding", emoji: "👰" },
-                  { text: "आधुनिक फैशन", emoji: "👗" },
-                  { text: "Sunset Beach", emoji: "🌅" },
-                  { text: "साड़ी में सुंदर", emoji: "🥻" },
-                  { text: "Cyberpunk Style", emoji: "🤖" },
-                ].map((example, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setTopic(example.text)}
-                    className="flex-shrink-0 text-xs font-medium bg-white border border-gray-200 px-3 py-1.5 rounded-full hover:border-red-300 hover:bg-red-50 transition-all text-gray-600 whitespace-nowrap shadow-sm flex items-center gap-1.5 active:scale-95"
-                  >
-                    <span>{example.emoji}</span>
-                    {example.text}
-                  </button>
-                ))}
-              </div>
+            {/* Manual Prompt Input */}
+            <div className="space-y-3">
+              <Label htmlFor="manual-prompt" className="text-lg font-bold flex items-center gap-2 text-gray-800">
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
+                  <Edit className="h-5 w-5 text-white" />
+                </div>
+                Or Write Your Own Prompt
+              </Label>
+              <textarea
+                id="manual-prompt"
+                value={manualPrompt}
+                onChange={(e) => {
+                  setManualPrompt(e.target.value)
+                  if (e.target.value.trim()) setTopic("")
+                }}
+                placeholder="अपना खुद का prompt लिखें... (e.g., नीली साड़ी में खूबसूरत लड़की)"
+                className="w-full min-h-24 resize-none text-base font-medium border-2 border-gray-300 focus:border-blue-600 rounded-xl p-4 transition-all shadow-sm"
+              />
+              <p className="text-xs text-gray-600 italic">
+                💡 Tip: Be descriptive for better results
+              </p>
             </div>
 
             {/* Generate Button */}
             <Button
               onClick={handleGenerate}
-              disabled={isGenerating || !topic || !characterImage}
-              className="w-full h-14 gap-2 text-lg font-bold bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 hover:from-red-700 hover:via-pink-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-red-500/30 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 rounded-xl mt-2"
+              disabled={isGenerating || (!topic && !manualPrompt.trim()) || !characterImage}
+              className="w-full h-16 gap-3 text-xl font-bold bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 hover:from-blue-800 hover:via-blue-900 hover:to-indigo-950 transition-all shadow-xl hover:shadow-blue-600/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 rounded-xl mt-2"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <Loader2 className="h-6 w-6 animate-spin" />
                   <span className="animate-pulse">Creating Magic...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-5 w-5" />
+                  <Sparkles className="h-6 w-6" />
                   Generate AI Image
                 </>
               )}
             </Button>
           </CardContent>
         </Card>
+        )}
 
-        {/* Generated Image Preview & Post Section */}
-        {imageSrc && (
-          <Card className="border-0 shadow-2xl overflow-hidden bg-white/90 backdrop-blur-lg animate-scale-in">
+        {/* Generated Image Preview & Actions */}
+        {imageSrc && !showEditForm && (
+          <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
             <CardContent className="p-0">
               {/* Generated Image */}
               <div className="relative group">
+                <div className="absolute top-4 right-4 z-10">
+                  <button onClick={clearAllData} className="p-2 bg-black/50 hover:bg-red-500 text-white rounded-full backdrop-blur-md transition-all shadow-lg">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
                 <img
                   src={imageSrc}
                   alt="Generated AI Image"
-                  className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full aspect-square object-cover"
                 />
-                <div className="absolute top-6 left-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 animate-bounce-in">
-                  <Sparkles className="h-5 w-5 animate-spin-slow" />
-                  AI Generated ✨
+              </div>
+
+              {/* Action Buttons */}
+              <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={handleShare}
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-blue-400 rounded-2xl hover:bg-blue-50 transition-all active:scale-95 shadow-md"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                      <Share2 className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-800">Share</span>
+                  </button>
+
+                  <button
+                    onClick={handleEdit}
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-indigo-400 rounded-2xl hover:bg-indigo-50 transition-all active:scale-95 shadow-md"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                      <Edit className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-800">Edit</span>
+                  </button>
+
+                  <button
+                    onClick={handleDownload}
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-green-400 rounded-2xl hover:bg-green-50 transition-all active:scale-95 shadow-md"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg">
+                      <Download className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-gray-800">Download</span>
+                  </button>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Edit Form */}
+        {showEditForm && imageSrc && (
+          <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
+            <CardContent className="p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <Edit className="h-6 w-6 text-blue-600" />
+                  Edit & Regenerate
+                </h3>
                 <button
-                  onClick={() => setImageSrc("")}
-                  className="absolute top-6 right-6 p-4 bg-red-500/90 backdrop-blur-sm rounded-full text-white hover:bg-red-600 transition-all hover:scale-110 shadow-2xl hover:rotate-90 duration-300"
+                  onClick={() => setShowEditForm(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5 text-gray-600" />
                 </button>
               </div>
 
-              {/* Post Details */}
-              <div className="p-8 space-y-6 bg-gradient-to-br from-red-50/50 to-pink-50/50">
-                <div className="space-y-3">
-                  <Label htmlFor="caption" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span className="text-2xl">💬</span> Caption
+              {/* Current Image Preview */}
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-300">
+                <img src={imageSrc} alt="Current" className="w-full h-full object-cover" />
+              </div>
+
+              {/* Edit Prompts */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-800">Select Style</Label>
+                  <div className="relative">
+                    <select
+                      value={topic}
+                      onChange={(e) => {
+                        setTopic(e.target.value)
+                        setManualPrompt("")
+                      }}
+                      className="w-full h-12 text-sm font-medium border-2 border-gray-300 focus:border-blue-600 rounded-xl px-3 pr-10 bg-white appearance-none"
+                    >
+                      <option value="">-- Select --</option>
+                      {allPrompts.map((category) => (
+                        <optgroup key={category.category} label={category.category}>
+                          {category.prompts.map((prompt, idx) => (
+                            <option key={idx} value={prompt}>{prompt}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-800">Or Write Custom Prompt</Label>
+                  <textarea
+                    value={manualPrompt}
+                    onChange={(e) => {
+                      setManualPrompt(e.target.value)
+                      if (e.target.value.trim()) setTopic("")
+                    }}
+                    placeholder="अपना prompt लिखें..."
+                    className="w-full min-h-20 resize-none text-sm border-2 border-gray-300 focus:border-blue-600 rounded-xl p-3"
+                  />
+                </div>
+              </div>
+
+              {/* Caption & Tags */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-caption" className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <span className="text-lg">💬</span> Caption (Optional)
                   </Label>
                   <textarea
-                    id="caption"
+                    id="edit-caption"
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
-                    placeholder="अपनी creativity के बारे में कुछ लिखें..."
-                    className="w-full min-h-28 resize-none text-base border-3 border-gray-300 focus:border-red-500 rounded-2xl p-4 shadow-lg transition-all"
+                    placeholder="Write something..."
+                    className="w-full min-h-20 resize-none text-sm border-2 border-gray-300 focus:border-blue-600 rounded-xl p-3 transition-all"
                   />
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="tags" className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span className="text-2xl">#️⃣</span> Tags
+                <div className="space-y-2">
+                  <Label htmlFor="edit-tags" className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                    <span className="text-lg">#️⃣</span> Tags (Optional)
                   </Label>
                   <Input
-                    id="tags"
+                    id="edit-tags"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
-                    placeholder="#art, #ai, #fashion, #creative"
-                    className="h-14 text-base border-3 border-gray-300 focus:border-red-500 rounded-2xl shadow-lg px-5"
+                    placeholder="#art, #ai, #fashion"
+                    className="h-12 text-sm border-2 border-gray-300 focus:border-blue-600 rounded-xl px-4"
                   />
                 </div>
+              </div>
 
-                <Button 
-                  onClick={handlePost} 
-                  disabled={isPosting} 
-                  className="w-full h-16 gap-4 text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all shadow-2xl hover:shadow-green-500/50 hover:scale-105 rounded-2xl"
+              {/* Regenerate Button */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => setShowEditForm(false)}
+                  variant="outline"
+                  className="h-14 text-base font-bold border-2 border-gray-300 hover:bg-gray-100 rounded-xl"
                 >
-                  {isPosting ? (
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating || (!topic && !manualPrompt.trim())}
+                  className="h-14 gap-2 text-base font-bold bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 transition-all shadow-lg rounded-xl"
+                >
+                  {isGenerating ? (
                     <>
-                      <Loader2 className="h-7 w-7 animate-spin" />
-                      Posting...
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Regenerating...
                     </>
                   ) : (
                     <>
-                      <Send className="h-7 w-7" />
-                      Share to Feed 🚀
+                      <Sparkles className="h-5 w-5" />
+                      Regenerate
                     </>
                   )}
                 </Button>
               </div>
+
+              {/* Post Button */}
+              <Button 
+                onClick={handlePost} 
+                disabled={isPosting} 
+                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:scale-105 rounded-xl"
+              >
+                {isPosting ? (
+                  <>
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    Posting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-6 w-6" />
+                    Share to Feed 🚀
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -476,19 +803,6 @@ export default function CreatePage() {
           to { 
             opacity: 1;
             transform: scale(1);
-          }
-        }
-        @keyframes bounce-in {
-          0% { 
-            transform: scale(0);
-            opacity: 0;
-          }
-          50% { 
-            transform: scale(1.15);
-          }
-          100% { 
-            transform: scale(1);
-            opacity: 1;
           }
         }
         @keyframes pulse-scale {
@@ -520,9 +834,6 @@ export default function CreatePage() {
         }
         .animate-scale-in {
           animation: scale-in 0.5s ease-out;
-        }
-        .animate-bounce-in {
-          animation: bounce-in 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         .animate-pulse-scale {
           animation: pulse-scale 2s ease-in-out infinite;

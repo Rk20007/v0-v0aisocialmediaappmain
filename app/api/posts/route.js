@@ -10,7 +10,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
-    const { content, imageUrl, caption, tags } = await request.json()
+    const { content, imageUrl, caption, tags, status, topic } = await request.json()
 
     const db = await getDb()
 
@@ -21,6 +21,8 @@ export async function POST(request) {
       imageUrl: imageUrl || "",
       caption: caption || "",
       tags: tags || [],
+      status: status || "posted",
+      topic: topic || "",
       likes: [],
       comments: [],
       shares: 0,
@@ -46,6 +48,42 @@ export async function POST(request) {
     })
   } catch (error) {
     console.error("Create post error:", error)
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { postId, caption, tags, status } = await request.json()
+
+    if (!postId) {
+      return NextResponse.json({ success: false, error: "Post ID required" }, { status: 400 })
+    }
+
+    const db = await getDb()
+
+    const updateDoc = {
+      $set: {
+        updatedAt: new Date(),
+      },
+    }
+
+    if (caption !== undefined) updateDoc.$set.caption = caption
+    if (tags !== undefined) updateDoc.$set.tags = tags
+    if (status !== undefined) updateDoc.$set.status = status
+
+    const result = await db
+      .collection("posts")
+      .updateOne({ _id: new ObjectId(postId), userId: new ObjectId(session.userId) }, updateDoc)
+
+    return NextResponse.json({ success: true, modifiedCount: result.modifiedCount })
+  } catch (error) {
+    console.error("Update post error:", error)
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
