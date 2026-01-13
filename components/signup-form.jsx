@@ -5,17 +5,16 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button" 
-import { useLoading } from "@/components/ui/loading-provider" // Import useLoading
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Phone, Eye, EyeOff, User } from "lucide-react" // Removed Loader2
+import { Phone, Eye, EyeOff, User, Loader2 } from "lucide-react"
 
 export default function SignupForm() {
   const router = useRouter()
   const { signup } = useAuth()
-  const { isLoading, setLoading } = useLoading() // Use global loading state
+  const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [signupMethod, setSignupMethod] = useState("mobile")
@@ -29,18 +28,18 @@ export default function SignupForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true) // Set global loading to true
+    setIsLoading(true)
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
-      setLoading(false) // Turn off loading if validation fails
+      setIsLoading(false)
       return
     }
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters")
-      setLoading(false) // Turn off loading if validation fails
+      setIsLoading(false)
       return
     }
 
@@ -61,7 +60,7 @@ export default function SignupForm() {
     } catch (err) {
       setError("Something went wrong. Please try again.")
     } finally { // Ensure loading is turned off regardless of success or failure
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
@@ -158,7 +157,14 @@ export default function SignupForm() {
                 {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
                 <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
-                  Create Account
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </form>
             </Tabs>

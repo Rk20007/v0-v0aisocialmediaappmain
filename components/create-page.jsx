@@ -340,10 +340,10 @@ export default function CreatePage() {
             <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent mb-4">
               Generating Image
             </h3>
-            <p className="text-xl font-semibold text-gray-700 mb-2">
+            <p className="text-xl font-semibold text-blue-900 mb-2">
               कृपया प्रतीक्षा करें...
             </p>
-            <p className="text-lg text-gray-500 mb-6">
+            <p className="text-lg text-blue-700 mb-6">
               Please wait, creating magic ✨
             </p>
             <div className="flex gap-3 justify-center">
@@ -362,7 +362,7 @@ export default function CreatePage() {
           <CardContent className="p-6 space-y-6">
             {/* Character Image Upload */}
             <div className="space-y-4">
-              <Label className="text-lg font-bold flex items-center gap-2 text-gray-800">
+              <Label className="text-lg font-bold flex items-center gap-2 text-blue-950">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
                   <Image className="h-5 w-5 text-white" />
                 </div>
@@ -375,7 +375,7 @@ export default function CreatePage() {
                   <div className="w-40 h-40 rounded-full border-4 border-dashed border-blue-400 bg-blue-50 flex items-center justify-center shadow-inner">
                     <div className="text-center">
                       <Camera className="h-12 w-12 text-blue-500 mx-auto mb-2" />
-                      <p className="text-xs text-gray-600 font-medium">Preview</p>
+                      <p className="text-xs text-blue-600 font-medium">Preview</p>
                     </div>
                   </div>
                   
@@ -387,7 +387,7 @@ export default function CreatePage() {
                       <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
                         <FolderOpen className="h-6 w-6 text-white" />
                       </div>
-                      <span className="text-sm font-bold text-gray-800">Gallery</span>
+                      <span className="text-sm font-bold text-blue-900">Gallery</span>
                     </button>
                     
                     <button
@@ -397,7 +397,7 @@ export default function CreatePage() {
                       <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg">
                         <Camera className="h-6 w-6 text-white" />
                       </div>
-                      <span className="text-sm font-bold text-gray-800">Selfie</span>
+                      <span className="text-sm font-bold text-blue-900">Selfie</span>
                     </button>
                   </div>
                 </div>
@@ -422,7 +422,7 @@ export default function CreatePage() {
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <button
                       onClick={() => document.getElementById("gallery-input")?.click()}
-                      className="flex items-center justify-center gap-2 p-3 border-2 border-blue-400 rounded-xl bg-white hover:bg-blue-50 transition-all text-sm font-semibold text-gray-800 shadow-sm"
+                      className="flex items-center justify-center gap-2 p-3 border-2 border-blue-400 rounded-xl bg-white hover:bg-blue-50 transition-all text-sm font-semibold text-blue-900 shadow-sm"
                     >
                       <FolderOpen className="h-4 w-4 text-blue-600" />
                       Change
@@ -430,7 +430,7 @@ export default function CreatePage() {
                     
                     <button
                       onClick={() => document.getElementById("gallery-input")?.click()}
-                      className="flex items-center justify-center gap-2 p-3 border-2 border-indigo-400 rounded-xl bg-white hover:bg-indigo-50 transition-all text-sm font-semibold text-gray-800 shadow-sm"
+                      className="flex items-center justify-center gap-2 p-3 border-2 border-indigo-400 rounded-xl bg-white hover:bg-indigo-50 transition-all text-sm font-semibold text-blue-900 shadow-sm"
                     >
                       <Camera className="h-4 w-4 text-indigo-600" />
                       Retake
@@ -450,17 +450,17 @@ export default function CreatePage() {
 
             {/* Uniform Toggle & Upload */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200 shadow-sm">
                 <input 
                   type="checkbox" 
                   id="useUniform"
                   checked={useUniform}
                   onChange={(e) => setUseUniform(e.target.checked)}
-                  className="w-5 h-5 rounded border-gray-300 text-blue-700 focus:ring-blue-600"
+                  className="w-5 h-5 rounded border-blue-300 text-blue-700 focus:ring-blue-600"
                 />
-                <Label htmlFor="useUniform" className="text-sm font-semibold text-gray-800 flex-1 cursor-pointer">
+                <Label htmlFor="useUniform" className="text-sm font-semibold text-blue-900 flex-1 cursor-pointer">
                   Add Uniform / Dress Reference
-                  <span className="block text-xs text-gray-600 font-normal">Optional</span>
+                  <span className="block text-xs text-blue-600 font-normal">Optional</span>
                 </Label>
               </div>
               
@@ -475,7 +475,7 @@ export default function CreatePage() {
                         <div className="w-10 h-10 rounded-full bg-blue-600 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform text-white">
                           <Plus className="h-5 w-5" />
                         </div>
-                        <p className="text-xs font-bold text-gray-800">Add Uniform</p>
+                        <p className="text-xs font-bold text-blue-900">Add Uniform</p>
                       </div>
                     </div>
                   ) : (
@@ -508,8 +508,8 @@ export default function CreatePage() {
 
             {/* Single Unified Prompt Dropdown */}
             <div className="space-y-3">
-              <Label htmlFor="prompt-dropdown" className="text-lg font-bold flex items-center gap-2 text-gray-800">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center shadow-md">
+              <Label htmlFor="prompt-dropdown" className="text-lg font-bold flex items-center gap-2 text-blue-950">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-md">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 Select Style Prompt
@@ -522,7 +522,7 @@ export default function CreatePage() {
                     setTopic(e.target.value)
                     setManualPrompt("")
                   }}
-                  className="w-full h-14 text-base font-medium border-2 border-gray-300 focus:border-blue-600 rounded-xl shadow-sm transition-all px-4 pr-10 bg-white appearance-none cursor-pointer"
+                  className="w-full h-14 text-base font-medium border-2 border-blue-200 focus:border-blue-600 rounded-xl shadow-sm transition-all px-4 pr-10 bg-white appearance-none cursor-pointer"
                 >
                   <option value="">-- Select a Style --</option>
                   {allPrompts.map((category) => (
@@ -533,14 +533,14 @@ export default function CreatePage() {
                     </optgroup>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-400 pointer-events-none" />
               </div>
             </div>
 
             {/* Manual Prompt Input */}
             <div className="space-y-3">
-              <Label htmlFor="manual-prompt" className="text-lg font-bold flex items-center gap-2 text-gray-800">
-                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
+              <Label htmlFor="manual-prompt" className="text-lg font-bold flex items-center gap-2 text-blue-950">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
                   <Edit className="h-5 w-5 text-white" />
                 </div>
                 Or Write Your Own Prompt
@@ -553,9 +553,9 @@ export default function CreatePage() {
                   if (e.target.value.trim()) setTopic("")
                 }}
                 placeholder="अपना खुद का prompt लिखें... (e.g., नीली साड़ी में खूबसूरत लड़की)"
-                className="w-full min-h-24 resize-none text-base font-medium border-2 border-gray-300 focus:border-blue-600 rounded-xl p-4 transition-all shadow-sm"
+                className="w-full min-h-24 resize-none text-base font-medium border-2 border-blue-200 focus:border-blue-600 rounded-xl p-4 transition-all shadow-sm"
               />
-              <p className="text-xs text-gray-600 italic">
+              <p className="text-xs text-blue-600 italic">
                 💡 Tip: Be descriptive for better results
               </p>
             </div>
@@ -601,7 +601,7 @@ export default function CreatePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50">
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={handleShare}
@@ -610,7 +610,7 @@ export default function CreatePage() {
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
                       <Share2 className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-gray-800">Share</span>
+                    <span className="text-sm font-bold text-blue-900">Share</span>
                   </button>
 
                   <button
@@ -620,17 +620,17 @@ export default function CreatePage() {
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
                       <Edit className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-gray-800">Edit</span>
+                    <span className="text-sm font-bold text-blue-900">Edit</span>
                   </button>
 
                   <button
                     onClick={handleDownload}
-                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-green-400 rounded-2xl hover:bg-green-50 transition-all active:scale-95 shadow-md"
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-cyan-400 rounded-2xl hover:bg-cyan-50 transition-all active:scale-95 shadow-md"
                   >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg">
                       <Download className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-gray-800">Download</span>
+                    <span className="text-sm font-bold text-blue-900">Download</span>
                   </button>
                 </div>
               </div>
@@ -643,27 +643,27 @@ export default function CreatePage() {
           <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <h3 className="text-2xl font-bold text-blue-950 flex items-center gap-2">
                   <Edit className="h-6 w-6 text-blue-600" />
                   Edit & Regenerate
                 </h3>
                 <button
                   onClick={() => setShowEditForm(false)}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  className="p-2 hover:bg-blue-50 rounded-full transition-colors"
                 >
-                  <X className="h-5 w-5 text-gray-600" />
+                  <X className="h-5 w-5 text-blue-600" />
                 </button>
               </div>
 
               {/* Current Image Preview */}
-              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-300">
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-blue-200">
                 <img src={imageSrc} alt="Current" className="w-full h-full object-cover" />
               </div>
 
               {/* Edit Prompts */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-bold text-gray-800">Select Style</Label>
+                  <Label className="text-sm font-bold text-blue-900">Select Style</Label>
                   <div className="relative">
                     <select
                       value={topic}
@@ -671,7 +671,7 @@ export default function CreatePage() {
                         setTopic(e.target.value)
                         setManualPrompt("")
                       }}
-                      className="w-full h-12 text-sm font-medium border-2 border-gray-300 focus:border-blue-600 rounded-xl px-3 pr-10 bg-white appearance-none"
+                      className="w-full h-12 text-sm font-medium border-2 border-blue-200 focus:border-blue-600 rounded-xl px-3 pr-10 bg-white appearance-none"
                     >
                       <option value="">-- Select --</option>
                       {allPrompts.map((category) => (
@@ -682,12 +682,12 @@ export default function CreatePage() {
                         </optgroup>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-bold text-gray-800">Or Write Custom Prompt</Label>
+                  <Label className="text-sm font-bold text-blue-900">Or Write Custom Prompt</Label>
                   <textarea
                     value={manualPrompt}
                     onChange={(e) => {
@@ -695,7 +695,7 @@ export default function CreatePage() {
                       if (e.target.value.trim()) setTopic("")
                     }}
                     placeholder="अपना prompt लिखें..."
-                    className="w-full min-h-20 resize-none text-sm border-2 border-gray-300 focus:border-blue-600 rounded-xl p-3"
+                    className="w-full min-h-20 resize-none text-sm border-2 border-blue-200 focus:border-blue-600 rounded-xl p-3"
                   />
                 </div>
               </div>
@@ -703,7 +703,7 @@ export default function CreatePage() {
               {/* Caption & Tags */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-caption" className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                  <Label htmlFor="edit-caption" className="text-sm font-bold text-blue-900 flex items-center gap-2">
                     <span className="text-lg">💬</span> Caption (Optional)
                   </Label>
                   <textarea
@@ -711,12 +711,12 @@ export default function CreatePage() {
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Write something..."
-                    className="w-full min-h-20 resize-none text-sm border-2 border-gray-300 focus:border-blue-600 rounded-xl p-3 transition-all"
+                    className="w-full min-h-20 resize-none text-sm border-2 border-blue-200 focus:border-blue-600 rounded-xl p-3 transition-all"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-tags" className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                  <Label htmlFor="edit-tags" className="text-sm font-bold text-blue-900 flex items-center gap-2">
                     <span className="text-lg">#️⃣</span> Tags (Optional)
                   </Label>
                   <Input
@@ -724,7 +724,7 @@ export default function CreatePage() {
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="#art, #ai, #fashion"
-                    className="h-12 text-sm border-2 border-gray-300 focus:border-blue-600 rounded-xl px-4"
+                    className="h-12 text-sm border-2 border-blue-200 focus:border-blue-600 rounded-xl px-4"
                   />
                 </div>
               </div>
@@ -734,7 +734,7 @@ export default function CreatePage() {
                 <Button
                   onClick={() => setShowEditForm(false)}
                   variant="outline"
-                  className="h-14 text-base font-bold border-2 border-gray-300 hover:bg-gray-100 rounded-xl"
+                  className="h-14 text-base font-bold border-2 border-blue-200 hover:bg-blue-50 rounded-xl"
                 >
                   Cancel
                 </Button>
@@ -761,7 +761,7 @@ export default function CreatePage() {
               <Button 
                 onClick={handlePost} 
                 disabled={isPosting} 
-                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:scale-105 rounded-xl"
+                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg hover:scale-105 rounded-xl"
               >
                 {isPosting ? (
                   <>
