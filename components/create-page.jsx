@@ -278,7 +278,6 @@ export default function CreatePage() {
               </div>
               
               {useUniform && (
-                
                 <div className="animate-fade-in">
                   {!uniformImage ? (
                     <div 
