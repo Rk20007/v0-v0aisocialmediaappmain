@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Sparkles, Loader2, X, Send, Image, Plus } from "lucide-react" // Removed Upload as it's not directly used here
-import { useToast } from "@/components/use-toast" // Corrected import path
+import { Sparkles, Loader2, X, Send, Upload, Image, Plus } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CreatePage() {
   const router = useRouter()
@@ -20,7 +20,7 @@ export default function CreatePage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isPosting, setIsPosting] = useState(false)
   const [useUniform, setUseUniform] = useState(false)
- 
+
   const handleGenerate = async () => {
     if (!characterImage) {
       toast({
@@ -200,10 +200,10 @@ export default function CreatePage() {
               <Sparkles className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-5xl font-black bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
-              Colorcode
+              Color Code
             </h1>
           </div>
-          <p className="text-gray-600 text-xl font-medium">अपनी पसंदीदा ड्रेस में AI इमेज बनाएं</p>
+          <p className="text-gray-600 text-xl font-medium">AI के साथ अपना creative vision बनाएं</p>
         </div>
 
         {/* Main Form Card */}
@@ -217,7 +217,7 @@ export default function CreatePage() {
                 <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center shadow-md">
                   <Image className="h-5 w-5 text-white" />
                 </div>
-                अपनी फोटो / चेहरा अपलोड करें
+                Character Image / Face Picture
                 <span className="text-xs text-red-600 font-semibold bg-red-100 px-2 py-0.5 rounded-full">Required</span>
               </Label>
               
@@ -231,7 +231,7 @@ export default function CreatePage() {
                       <Plus className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-700 text-center">फोटो अपलोड करें</p>
+                      <p className="text-sm font-bold text-gray-700 text-center">Upload Character</p>
                       <p className="text-[10px] text-gray-500 text-center">Tap to select image</p>
                     </div>
                   </div>
@@ -264,7 +264,7 @@ export default function CreatePage() {
             {/* Uniform Toggle & Upload */}
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                <input
+                <input 
                   type="checkbox" 
                   id="useUniform"
                   checked={useUniform}
@@ -272,7 +272,7 @@ export default function CreatePage() {
                   className="w-5 h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                 />
                 <Label htmlFor="useUniform" className="text-sm font-semibold text-gray-700 flex-1 cursor-pointer">
-                  ड्रेस या यूनिफॉर्म की फोटो अपलोड करें
+                  Add Uniform / Dress Reference
                   <span className="block text-xs text-gray-500 font-normal">Optional</span>
                 </Label>
               </div>
@@ -289,7 +289,7 @@ export default function CreatePage() {
                         <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform text-purple-500">
                           <Plus className="h-5 w-5" />
                         </div>
-                        <p className="text-xs font-bold text-gray-700">ड्रेस अपलोड करें</p>
+                        <p className="text-xs font-bold text-gray-700">Add Uniform</p>
                       </div>
                     </div>
                   ) : (
@@ -325,13 +325,13 @@ export default function CreatePage() {
                 <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-md">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
-                किस तरह की इमेज चाहिए?
+                Topic / विषय
               </Label>
               <div className="relative">
                 <Input
                   id="topic"
                   value={topic}
-                  onChange={(e) => setTopic(e.target.value)} // Keep English for input for broader AI understanding
+                  onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g., Ladies Saadi, Traditional Wear..."
                   className="h-14 text-base font-medium border-2 border-gray-200 focus:border-red-500 rounded-xl shadow-sm transition-all px-4 bg-gray-50 focus:bg-white"
                 />
@@ -341,11 +341,11 @@ export default function CreatePage() {
               <div className="flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-hide -mx-1 px-1">
                 {[
                   { text: "पारंपरिक भारतीय शादी", emoji: "💒" },
-                  { text: "सुंदर दुल्हन", emoji: "👰" },
-                  { text: "आधुनिक ड्रेस", emoji: "👗" },
-                  { text: "समुद्र किनारे", emoji: "🌅" },
+                  { text: "Traditional Wedding", emoji: "👰" },
+                  { text: "आधुनिक फैशन", emoji: "👗" },
+                  { text: "Sunset Beach", emoji: "🌅" },
                   { text: "साड़ी में सुंदर", emoji: "🥻" },
-                  { text: "स्टाइलिश लुक", emoji: "✨" },
+                  { text: "Cyberpunk Style", emoji: "🤖" },
                 ].map((example, i) => (
                   <button
                     key={i}
@@ -369,7 +369,7 @@ export default function CreatePage() {
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   <span className="animate-pulse">Creating Magic...</span>
-                </> // Keep English for loading for broader audience
+                </>
               ) : (
                 <>
                   <Sparkles className="h-5 w-5" />
@@ -412,7 +412,7 @@ export default function CreatePage() {
                   <textarea
                     id="caption"
                     value={caption}
-                    onChange={(e) => setCaption(e.target.value)} // Keep English for input for broader AI understanding
+                    onChange={(e) => setCaption(e.target.value)}
                     placeholder="अपनी creativity के बारे में कुछ लिखें..."
                     className="w-full min-h-28 resize-none text-base border-3 border-gray-300 focus:border-red-500 rounded-2xl p-4 shadow-lg transition-all"
                   />
@@ -425,7 +425,7 @@ export default function CreatePage() {
                   <Input
                     id="tags"
                     value={tags}
-                    onChange={(e) => setTags(e.target.value)} // Keep English for input for broader AI understanding
+                    onChange={(e) => setTags(e.target.value)}
                     placeholder="#art, #ai, #fashion, #creative"
                     className="h-14 text-base border-3 border-gray-300 focus:border-red-500 rounded-2xl shadow-lg px-5"
                   />

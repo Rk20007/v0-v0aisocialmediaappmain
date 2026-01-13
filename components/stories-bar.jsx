@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Loader2, X, ImageIcon, Video, Upload } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useToast } from "@/components/use-toast"
+import { useToast } from "@/hooks/use-toast"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 

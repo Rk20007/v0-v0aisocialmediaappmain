@@ -2,8 +2,6 @@ import { Poppins, Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { AuthProvider } from "@/components/auth-provider"
-import { LoadingProvider } from "@/components/ui/loading-provider"
-import { GlobalLoader } from "@/components/ui/global-loader"
 import { Toaster } from "@/components/ui/toaster"
 
 const poppins = Poppins({
@@ -63,11 +61,8 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${poppins.variable} ${inter.variable} font-sans antialiased`}>
         <AuthProvider>
-          <LoadingProvider>
-            {children}
-            <GlobalLoader />
-            <Toaster />
-          </LoadingProvider>
+          {children}
+          <Toaster />
         </AuthProvider>
         <Analytics />
       </body>

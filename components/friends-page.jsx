@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Search, UserPlus, UserCheck, UserX, Loader2, Users, MessageCircle, Clock } from "lucide-react"
-import { useToast } from "@/components/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 
 const fetcher = (url) => fetch(url).then((res) => res.json())

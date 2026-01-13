@@ -25,8 +25,8 @@ import {
   CheckCircle2,
   Bookmark,
 } from "lucide-react"
-import { cn } from "@/lib/utils" 
-import { useToast } from "@/components/use-toast"
+import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
