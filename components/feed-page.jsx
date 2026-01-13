@@ -37,7 +37,7 @@ export default function FeedPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
@@ -62,7 +62,7 @@ export default function FeedPage() {
           <div className="relative">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-sm flex items-center gap-2">
-                <Film className="h-4 w-4 text-primary" />
+                <Film className="h-4 w-4 text-blue-600" />
                 Reels
               </h3>
               <div className="flex gap-1">
@@ -81,9 +81,9 @@ export default function FeedPage() {
             >
               {/* Create Reel Button */}
               <Link href="/reels">
-                <div className="flex-shrink-0 w-24 h-40 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-border flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mb-2">
-                    <Play className="h-5 w-5 text-primary-foreground" />
+                <div className="flex-shrink-0 w-24 h-40 rounded-xl bg-gradient-to-br from-blue-600/20 to-blue-400/20 border border-border flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center mb-2">
+                    <Play className="h-5 w-5 text-white" />
                   </div>
                   <span className="text-xs font-medium">Watch Reels</span>
                 </div>
@@ -99,7 +99,7 @@ export default function FeedPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                      <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center">
                         <Film className="h-8 w-8 text-white" />
                       </div>
                     )}
@@ -123,9 +123,9 @@ export default function FeedPage() {
 
         {/* Create Post CTA */}
         <Link href="/create">
-          <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:border-primary/50 transition-colors cursor-pointer">
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">+</span>
+          <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 hover:border-blue-600/50 transition-colors cursor-pointer">
+            <div className="h-10 w-10 rounded-full bg-blue-600/10 flex items-center justify-center">
+              <span className="text-blue-600 font-bold text-lg">+</span>
             </div>
             <p className="text-muted-foreground">Create something amazing with AI...</p>
           </div>

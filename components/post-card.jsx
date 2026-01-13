@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
-
 export default function PostCard({ post, currentUserId, onUpdate }) {
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUserId))
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)
@@ -60,9 +60,9 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
     <Card className="border-0 shadow-lg overflow-hidden animate-fade-in">
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
         <Link href={`/user/${post.userId}`}>
-          <Avatar className="h-10 w-10 border-2 border-primary/20 cursor-pointer hover:border-primary transition-colors">
+          <Avatar className="h-10 w-10 border-2 border-blue-600/20 cursor-pointer hover:border-blue-600 transition-colors">
             <AvatarImage src={post.user?.avatar || "/placeholder.svg"} alt={post.user?.name} />
-            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+            <AvatarFallback className="bg-blue-600/10 text-blue-600 text-sm">
               {post.user?.name?.charAt(0)?.toUpperCase() || "?"}
             </AvatarFallback>
           </Avatar>
@@ -82,20 +82,30 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
         {post.caption && <p className="text-sm mb-3 whitespace-pre-wrap">{post.caption}</p>}
 
         {post.imageUrl && (
-          <div className="relative rounded-xl overflow-hidden bg-muted aspect-square">
-            <img
-              src={post.imageUrl || "/placeholder.svg"}
-              alt="Post"
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
+                <img
+                  src={post.imageUrl || "/placeholder.svg"}
+                  alt="Post"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/90 border-none sm:max-w-fit focus:outline-none">
+              <DialogTitle className="sr-only">View Post Image</DialogTitle>
+              <div className="relative flex items-center justify-center h-full max-h-[70vh] w-full p-2">
+                <img src={post.imageUrl || "/placeholder.svg"} alt="Post" className="max-h-[65vh] w-auto object-contain rounded-md" />
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
 
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {post.tags.map((tag, i) => (
-              <span key={i} className="text-xs text-primary font-medium">
+              <span key={i} className="text-xs text-blue-600 font-medium">
                 #{tag}
               </span>
             ))}
@@ -110,10 +120,10 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
               <Heart
                 className={cn(
                   "h-5 w-5 transition-all",
-                  isLiked ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground",
+                  isLiked ? "fill-blue-600 text-blue-600 scale-110" : "text-muted-foreground",
                 )}
               />
-              <span className={cn("text-sm font-medium", isLiked && "text-red-500")}>{likesCount}</span>
+              <span className={cn("text-sm font-medium", isLiked && "text-blue-600")}>{likesCount}</span>
             </button>
 
             <button

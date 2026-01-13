@@ -55,7 +55,7 @@ export default function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary">Colorcode</h1>
+          <h1 className="text-4xl font-bold text-blue-600">Colorcode</h1>
           <p className="text-muted-foreground mt-2">AI-Powered Social Network</p>
         </div>
 
@@ -131,7 +131,7 @@ export default function LoginForm() {
                   </div>
                 </div>
 
-                {error && <p className="text-sm text-destructive text-center">{error}</p>}
+                {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
                 <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
                   {isLoading ? (
@@ -149,7 +149,7 @@ export default function LoginForm() {
             <div className="mt-6 text-center">
               <p className="text-muted-foreground">
                 {"Don't have an account?"}{" "}
-                <Link href="/signup" className="text-primary font-semibold hover:underline">
+                <Link href="/signup" className="text-blue-600 font-semibold hover:underline">
                   Sign Up
                 </Link>
               </p>

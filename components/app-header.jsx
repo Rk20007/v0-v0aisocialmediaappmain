@@ -11,7 +11,7 @@ export default function AppHeader({ title }) {
   return (
     <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border safe-top">
       <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
-        <Link href="/feed" className="text-xl font-bold text-primary">
+        <Link href="/feed" className="text-xl font-bold text-blue-600">
           {title || "Colorcode"}
         </Link>
 
@@ -21,9 +21,9 @@ export default function AppHeader({ title }) {
           </button>
 
           <Link href="/profile">
-            <Avatar className="h-8 w-8 border-2 border-primary/20">
+            <Avatar className="h-8 w-8 border-2 border-blue-600/20">
               <AvatarImage src={user?.avatar || "/placeholder.svg"} alt={user?.name} />
-              <AvatarFallback className="text-xs bg-primary/10 text-primary">
+              <AvatarFallback className="text-xs bg-blue-600/10 text-blue-600">
                 {user?.name?.charAt(0)?.toUpperCase() || "?"}
               </AvatarFallback>
             </Avatar>

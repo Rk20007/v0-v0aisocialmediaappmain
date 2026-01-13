@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { Settings, LogOut, Grid, Bookmark, MapPin, Calendar, Loader2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { useEffect } from "react"
@@ -43,7 +44,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     )
   }
@@ -52,11 +53,11 @@ export default function ProfilePage() {
     <div className="pb-4">
       {/* Cover & Avatar */}
       <div className="relative">
-        <div className="h-32 bg-gradient-to-r from-primary/30 to-secondary/30" />
+        <div className="h-32 bg-gradient-to-r from-blue-600/30 to-blue-400/30" />
         <div className="absolute -bottom-12 left-4">
           <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
             <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-            <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+            <AvatarFallback className="text-2xl bg-blue-600/10 text-blue-600">
               {user.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -130,7 +131,7 @@ export default function ProfilePage() {
         <TabsContent value="posts" className="mt-4">
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
             </div>
           ) : posts.length === 0 ? (
             <Card className="border-0 shadow-lg">
@@ -141,11 +142,25 @@ export default function ProfilePage() {
           ) : (
             <div className="grid grid-cols-3 gap-1">
               {posts.map((post) => (
-                <div key={post._id} className="aspect-square bg-muted rounded-lg overflow-hidden">
-                  {post.imageUrl && (
-                    <img src={post.imageUrl || "/placeholder.svg"} alt="Post" className="w-full h-full object-cover" />
-                  )}
-                </div>
+                <Dialog key={post._id}>
+                  <DialogTrigger asChild>
+                    <div className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer group">
+                      {post.imageUrl && (
+                        <img
+                          src={post.imageUrl || "/placeholder.svg"}
+                          alt="Post"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        />
+                      )}
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/90 border-none sm:max-w-fit focus:outline-none">
+                    <DialogTitle className="sr-only">View Post Image</DialogTitle>
+                    <div className="relative flex items-center justify-center h-full max-h-[70vh] w-full p-2">
+                      <img src={post.imageUrl || "/placeholder.svg"} alt="Post" className="max-h-[65vh] w-auto object-contain rounded-md" />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               ))}
             </div>
           )}

@@ -191,8 +191,8 @@ export default function ReelsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold flex items-center gap-3 text-white">
-                <div className="p-2 bg-red-500/20 rounded-lg">
-                  <Film className="h-5 w-5 text-red-500" />
+                <div className="p-2 bg-blue-600/20 rounded-lg">
+                  <Film className="h-5 w-5 text-blue-500" />
                 </div>
                 Create New Reel
               </h2>
@@ -225,8 +225,8 @@ export default function ReelsPage() {
                 className={cn(
                   "relative aspect-[9/16] max-h-[500px] rounded-2xl overflow-hidden border-2 border-dashed transition-all cursor-pointer",
                   selectedFile
-                    ? "border-red-500/50 bg-black/40"
-                    : "border-slate-600 bg-slate-900/40 hover:border-red-500/50",
+                    ? "border-blue-500/50 bg-black/40"
+                    : "border-slate-600 bg-slate-900/40 hover:border-blue-500/50",
                 )}
               >
                 {previewUrl ? (
@@ -237,7 +237,7 @@ export default function ReelsPage() {
                         type="button"
                         variant="secondary"
                         size="sm"
-                        className="absolute top-3 right-3 bg-red-500 hover:bg-red-600"
+                        className="absolute top-3 right-3 bg-blue-600 hover:bg-blue-700"
                         onClick={(e) => {
                           e.stopPropagation()
                           setSelectedFile(null)
@@ -260,8 +260,8 @@ export default function ReelsPage() {
                   </>
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                    <div className="p-4 rounded-full bg-red-500/10 mb-4">
-                      <Camera className="h-12 w-12 text-red-500" />
+                    <div className="p-4 rounded-full bg-blue-600/10 mb-4">
+                      <Camera className="h-12 w-12 text-blue-500" />
                     </div>
                     <p className="font-semibold text-white">Tap to select video</p>
                     <p className="text-sm">MP4, WebM up to 100MB</p>
@@ -298,13 +298,13 @@ export default function ReelsPage() {
                   <div className="flex items-center justify-center gap-2">
                     {uploadStatus === "uploading" && (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                         <p className="text-sm text-slate-400">Uploading video...</p>
                       </>
                     )}
                     {uploadStatus === "processing" && (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                         <p className="text-sm text-slate-400">Processing reel...</p>
                       </>
                     )}
@@ -327,7 +327,7 @@ export default function ReelsPage() {
 
               <Button
                 type="submit"
-                className="w-full h-12 text-lg font-semibold bg-red-500 hover:bg-red-600 text-white"
+                className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white"
                 disabled={uploadStatus !== "idle" || !selectedFile}
                 size="lg"
               >
@@ -368,7 +368,7 @@ export default function ReelsPage() {
             <Button
               onClick={() => setShowUpload(true)}
               size="lg"
-              className="gap-2 bg-red-500 hover:bg-red-600 text-white font-semibold"
+              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
             >
               <Plus className="h-5 w-5" />
               Create Reel
@@ -393,7 +393,7 @@ export default function ReelsPage() {
             key={i}
             className={cn(
               "h-1 flex-1 rounded-full transition-all duration-300 backdrop-blur-sm",
-              i === currentIndex ? "bg-red-500" : "bg-white/20",
+              i === currentIndex ? "bg-blue-600" : "bg-white/20",
             )}
           />
         ))}
@@ -403,7 +403,7 @@ export default function ReelsPage() {
       <Button
         onClick={() => setShowUpload(true)}
         size="icon"
-        className="absolute top-4 right-4 z-30 h-12 w-12 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg"
+        className="absolute top-4 right-4 z-30 h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
       >
         <Plus className="h-6 w-6" />
       </Button>
@@ -546,7 +546,7 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
 
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart className="h-28 w-28 text-red-500 fill-red-500 animate-ping" />
+            <Heart className="h-28 w-28 text-blue-500 fill-blue-500 animate-ping" />
           </div>
         )}
       </div>
@@ -570,11 +570,11 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
           <div className="flex items-center gap-3 flex-1">
             <Avatar className="h-12 w-12 border-2 border-white/30">
               <AvatarImage src={reel.user?.avatar || "/placeholder.svg"} alt={reel.user?.name} />
-              <AvatarFallback className="bg-red-500/30 text-white">{reel.user?.name?.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="bg-blue-600/30 text-white">{reel.user?.name?.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <Link href={`/profile/${reel.user?._id}`}>
-                <p className="font-bold text-white hover:text-red-400 transition">{reel.user?.name}</p>
+                <p className="font-bold text-white hover:text-blue-400 transition">{reel.user?.name}</p>
               </Link>
               {reel.caption && <p className="text-white/70 text-sm line-clamp-2">{reel.caption}</p>}
             </div>
@@ -586,10 +586,10 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
               <div
                 className={cn(
                   "p-3 rounded-full transition-all duration-200",
-                  liked ? "bg-red-500/30 scale-110" : "bg-white/10 hover:bg-white/20",
+                  liked ? "bg-blue-600/30 scale-110" : "bg-white/10 hover:bg-white/20",
                 )}
               >
-                <Heart className={cn("h-7 w-7 transition-all", liked ? "fill-red-500 text-red-500" : "text-white")} />
+                <Heart className={cn("h-7 w-7 transition-all", liked ? "fill-blue-500 text-blue-500" : "text-white")} />
               </div>
               <span className="text-white text-xs font-semibold">{likesCount}</span>
             </button>

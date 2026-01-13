@@ -6,11 +6,10 @@ import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Camera, Loader2, X, MapPin } from "lucide-react"
+import { Camera, Loader2, X, MapPin, ChevronDown } from "lucide-react"
 
 const INTEREST_OPTIONS = [
   "Photography",
@@ -31,6 +30,24 @@ const INTEREST_OPTIONS = [
   "Science",
 ]
 
+const PROFESSION_OPTIONS = [
+  "Actor",
+  "Influencer",
+  "Artist",
+  "Musician",
+  "Photographer",
+  "Model",
+  "Designer",
+  "Developer",
+  "Student",
+  "Entrepreneur",
+  "Writer",
+  "Dancer",
+  "Comedian",
+  "Gamer",
+  "Others",
+]
+
 export default function ProfileSetup() {
   const router = useRouter()
   const { user } = useAuth()
@@ -39,7 +56,7 @@ export default function ProfileSetup() {
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
-    bio: user?.bio || "",
+    profession: user?.profession || "",
     location: user?.location || "",
     interests: user?.interests || [],
     avatar: user?.avatar || "",
@@ -93,15 +110,15 @@ export default function ProfileSetup() {
               {/* Avatar Section */}
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
-                  <Avatar className="h-28 w-28 border-4 border-primary/20">
+                  <Avatar className="h-28 w-28 border-4 border-blue-600/20">
                     <AvatarImage src={formData.avatar || "/placeholder.svg"} alt="Profile" />
-                    <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+                    <AvatarFallback className="text-2xl bg-blue-600/10 text-blue-600">
                       {formData.name?.charAt(0)?.toUpperCase() || "?"}
                     </AvatarFallback>
                   </Avatar>
                   <button
                     type="button"
-                    className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+                    className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
                     onClick={() => document.getElementById("avatar-input").click()}
                   >
                     <Camera className="h-4 w-4" />
@@ -138,18 +155,24 @@ export default function ProfileSetup() {
                 />
               </div>
 
-              {/* Bio */}
+              {/* Profession */}
               <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  placeholder="Tell us about yourself..."
-                  className="min-h-24 resize-none"
-                  maxLength={200}
-                />
-                <p className="text-xs text-muted-foreground text-right">{formData.bio.length}/200</p>
+                <Label htmlFor="profession">Profession</Label>
+                <div className="relative">
+                  <select
+                    id="profession"
+                    value={formData.profession}
+                    onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
+                    className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                    required
+                  >
+                    <option value="" disabled>Select your profession</option>
+                    {PROFESSION_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                </div>
               </div>
 
               {/* Location */}
@@ -174,8 +197,8 @@ export default function ProfileSetup() {
                   {INTEREST_OPTIONS.map((interest) => (
                     <Badge
                       key={interest}
-                      variant={formData.interests.includes(interest) ? "default" : "outline"}
-                      className="cursor-pointer text-sm py-1.5 px-3 transition-all"
+                      variant="outline"
+                      className={`cursor-pointer text-sm py-1.5 px-3 transition-all ${formData.interests.includes(interest) ? "bg-blue-600 text-white border-blue-600" : "hover:border-blue-600"}`}
                       onClick={() => handleInterestToggle(interest)}
                     >
                       {interest}
@@ -185,9 +208,9 @@ export default function ProfileSetup() {
                 </div>
               </div>
 
-              {error && <p className="text-sm text-destructive text-center">{error}</p>}
+              {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
-              <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
+              <Button type="submit" className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />

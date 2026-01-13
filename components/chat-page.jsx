@@ -205,7 +205,7 @@ export default function ChatPage({ friendId }) {
                         className={cn(
                           "px-4 py-2.5 rounded-2xl break-words",
                           isOwn
-                            ? "bg-primary text-primary-foreground rounded-br-md"
+                            ? "bg-blue-600 text-white rounded-br-md"
                             : "bg-card border border-border rounded-bl-md",
                           msg.sending && "opacity-60",
                         )}

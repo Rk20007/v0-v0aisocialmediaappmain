@@ -29,10 +29,10 @@ export default function BottomNav() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl transition-all min-w-16",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                isActive ? "text-blue-600" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <div className={cn("p-1.5 rounded-xl transition-all", isActive && "bg-primary/10")}>
+              <div className={cn("p-1.5 rounded-xl transition-all", isActive && "bg-blue-600/10")}>
                 <Icon className={cn("h-5 w-5", isActive && "scale-110")} />
               </div>
               <span className="text-xs font-medium">{item.label}</span>

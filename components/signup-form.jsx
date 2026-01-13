@@ -4,24 +4,24 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button" 
+import { useLoading } from "@/components/ui/loading-provider" // Import useLoading
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail, Phone, Eye, EyeOff, Loader2, User } from "lucide-react"
+import { Phone, Eye, EyeOff, User } from "lucide-react" // Removed Loader2
 
 export default function SignupForm() {
   const router = useRouter()
   const { signup } = useAuth()
-  const [isLoading, setIsLoading] = useState(false)
+  const { isLoading, setLoading } = useLoading() // Use global loading state
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
-  const [signupMethod, setSignupMethod] = useState("email")
+  const [signupMethod, setSignupMethod] = useState("mobile")
 
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     mobile: "",
     password: "",
     confirmPassword: "",
@@ -29,18 +29,18 @@ export default function SignupForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
+    setLoading(true) // Set global loading to true
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
-      setIsLoading(false)
+      setLoading(false) // Turn off loading if validation fails
       return
     }
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters")
-      setIsLoading(false)
+      setLoading(false) // Turn off loading if validation fails
       return
     }
 
@@ -48,7 +48,7 @@ export default function SignupForm() {
       const userData = {
         name: formData.name,
         password: formData.password,
-        ...(signupMethod === "email" ? { email: formData.email } : { mobile: formData.mobile }),
+        mobile: formData.mobile,
       }
 
       const result = await signup(userData)
@@ -60,8 +60,8 @@ export default function SignupForm() {
       }
     } catch (err) {
       setError("Something went wrong. Please try again.")
-    } finally {
-      setIsLoading(false)
+    } finally { // Ensure loading is turned off regardless of success or failure
+      setLoading(false)
     }
   }
 
@@ -70,7 +70,7 @@ export default function SignupForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary">Colorcode</h1>
+          <h1 className="text-4xl font-bold text-blue-600">Colorcode</h1>
           <p className="text-muted-foreground mt-2">Join the AI Revolution</p>
         </div>
 
@@ -81,18 +81,13 @@ export default function SignupForm() {
           </CardHeader>
 
           <CardContent>
-            <Tabs value={signupMethod} onValueChange={setSignupMethod} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="email" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </TabsTrigger>
+            <Tabs value="mobile" onValueChange={setSignupMethod} className="w-full">
+              <TabsList className="grid w-full grid-cols-1 mb-6">
                 <TabsTrigger value="mobile" className="gap-2">
                   <Phone className="h-4 w-4" />
                   Mobile
                 </TabsTrigger>
               </TabsList>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
@@ -110,21 +105,6 @@ export default function SignupForm() {
                   </div>
                 </div>
 
-                <TabsContent value="email" className="mt-0">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required={signupMethod === "email"}
-                      className="h-12"
-                    />
-                  </div>
-                </TabsContent>
-
                 <TabsContent value="mobile" className="mt-0">
                   <div className="space-y-2">
                     <Label htmlFor="mobile">Mobile Number</Label>
@@ -132,9 +112,9 @@ export default function SignupForm() {
                       id="mobile"
                       type="tel"
                       placeholder="+91 98765 43210"
-                      value={formData.mobile}
-                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                      required={signupMethod === "mobile"}
+                      value={formData.mobile.replace(/\D/g, '')} // Ensure only digits are stored
+                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
+                      required
                       className="h-12"
                     />
                   </div>
@@ -175,17 +155,10 @@ export default function SignupForm() {
                   />
                 </div>
 
-                {error && <p className="text-sm text-destructive text-center">{error}</p>}
+                {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
                 <Button type="submit" className="w-full h-12 text-lg font-semibold" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    "Create Account"
-                  )}
+                  Create Account
                 </Button>
               </form>
             </Tabs>
@@ -193,7 +166,7 @@ export default function SignupForm() {
             <div className="mt-6 text-center">
               <p className="text-muted-foreground">
                 Already have an account?{" "}
-                <Link href="/login" className="text-primary font-semibold hover:underline">
+                <Link href="/login" className="text-blue-600 font-semibold hover:underline">
                   Sign In
                 </Link>
               </p>

@@ -5,7 +5,7 @@ import useSWR from "swr"
 import { useAuth } from "@/components/auth-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Loader2, X, ImageIcon, Video, Upload } from "lucide-react"
@@ -126,11 +126,11 @@ export default function StoriesBar() {
         {/* Add Story Button */}
         <button onClick={() => setShowUpload(true)} className="flex-shrink-0 flex flex-col items-center gap-1.5">
           <div className="relative">
-            <Avatar className="h-16 w-16 ring-2 ring-primary">
+            <Avatar className="h-16 w-16 ring-2 ring-blue-600">
               <AvatarImage src={user?.avatar || "/placeholder.svg"} />
               <AvatarFallback>{user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-blue-600 text-white flex items-center justify-center">
               <Plus className="h-4 w-4" />
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function StoriesBar() {
               <div
                 className={cn(
                   "p-0.5 rounded-full",
-                  isOwn ? "bg-muted" : allViewed ? "bg-muted" : "bg-gradient-to-tr from-primary to-secondary",
+                  isOwn ? "bg-muted" : allViewed ? "bg-muted" : "bg-gradient-to-tr from-blue-600 to-blue-400",
                 )}
               >
                 <Avatar className="h-16 w-16 ring-2 ring-background">
@@ -169,7 +169,7 @@ export default function StoriesBar() {
       <Dialog open={showUpload} onOpenChange={setShowUpload}>
         <DialogContent className="sm:max-w-md">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">Add Story</h2>
+            <DialogTitle className="text-lg font-bold">Add Story</DialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -190,8 +190,8 @@ export default function StoriesBar() {
               className={cn(
                 "relative aspect-[9/16] max-h-[400px] rounded-xl overflow-hidden border-2 border-dashed cursor-pointer transition-colors",
                 selectedFile
-                  ? "border-primary bg-black"
-                  : "border-muted-foreground/30 bg-muted/50 hover:border-primary/50",
+                  ? "border-blue-600 bg-black"
+                  : "border-muted-foreground/30 bg-muted/50 hover:border-blue-600/50",
               )}
             >
               {previewUrl ? (
@@ -219,11 +219,11 @@ export default function StoriesBar() {
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
                   <div className="flex gap-2 mb-3">
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <ImageIcon className="h-8 w-8 text-primary" />
+                    <div className="p-3 rounded-full bg-blue-600/10">
+                      <ImageIcon className="h-8 w-8 text-blue-600" />
                     </div>
-                    <div className="p-3 rounded-full bg-primary/10">
-                      <Video className="h-8 w-8 text-primary" />
+                    <div className="p-3 rounded-full bg-blue-600/10">
+                      <Video className="h-8 w-8 text-blue-600" />
                     </div>
                   </div>
                   <p className="font-medium">Tap to select media</p>
