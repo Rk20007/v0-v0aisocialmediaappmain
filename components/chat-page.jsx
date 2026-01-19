@@ -119,7 +119,7 @@ export default function ChatPage({ friendId }) {
   if (!friend) {
     return (
       <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="flex items-center gap-3 p-4 border-b border-border bg-card shadow-sm">
+        <div className="flex items-center gap-3 p-4 border-b border-border bg-card shadow-sm mb-4">
           <Link href="/messages">
             <Button variant="ghost" size="icon" className="h-9 w-9">
               <ArrowLeft className="h-5 w-5" />
@@ -134,9 +134,9 @@ export default function ChatPage({ friendId }) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-[calc(100vh-8rem)] bg-slate-50 dark:bg-black">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border bg-card shadow-sm">
+      <div className="flex items-center gap-3 p-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
         <Link href="/messages">
           <Button variant="ghost" size="icon" className="h-9 w-9">
             <ArrowLeft className="h-5 w-5" />
@@ -162,65 +162,93 @@ export default function ChatPage({ friendId }) {
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar bg-muted/20"
+        className="flex-1 overflow-y-auto p-4 space-y-6 hide-scrollbar"
       >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <p className="text-muted-foreground mb-2">No messages yet</p>
-              <p className="text-sm text-muted-foreground">Start the conversation!</p>
+              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
+                  <AvatarFallback>{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                </Avatar>
+              </div>
+              <p className="font-semibold text-lg mb-1">{friend?.name}</p>
+              <p className="text-sm text-muted-foreground">Start chatting with {friend?.name}</p>
             </div>
           </div>
         ) : (
           Object.entries(groupedMessages).map(([date, msgs]) => (
-            <div key={date} className="space-y-3">
+            <div key={date}>
               {/* Date Divider */}
-              <div className="flex items-center justify-center">
-                <Badge variant="secondary" className="text-xs">
-                  {new Date(date).toDateString() === new Date().toDateString()
-                    ? "Today"
-                    : new Date(date).toDateString() === new Date(Date.now() - 86400000).toDateString()
-                      ? "Yesterday"
-                      : date}
-                </Badge>
+              <div className="relative flex items-center justify-center py-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border/40" />
+                </div>
+                <div className="relative flex justify-center text-xs font-medium uppercase tracking-wider">
+                  <span className="bg-slate-50 dark:bg-black px-3 text-muted-foreground/60">
+                    {new Date(date).toDateString() === new Date().toDateString()
+                      ? "Today"
+                      : new Date(date).toDateString() === new Date(Date.now() - 86400000).toDateString()
+                        ? "Yesterday"
+                        : date}
+                  </span>
+                </div>
               </div>
 
               {/* Messages for this date */}
               {msgs.map((msg, index) => {
                 const isOwn = msg.senderId === user?._id
-                const showAvatar = index === msgs.length - 1 || msgs[index + 1]?.senderId !== msg.senderId
-                const showTime = index === msgs.length - 1 || msgs[index + 1]?.senderId !== msg.senderId
+                const nextMsg = msgs[index + 1]
+                const prevMsg = msgs[index - 1]
+                
+                const isLastInSequence = !nextMsg || nextMsg.senderId !== msg.senderId
+                const isFirstInSequence = !prevMsg || prevMsg.senderId !== msg.senderId
+                
+                const showAvatar = !isOwn && isLastInSequence
+                const showTime = isLastInSequence
 
                 return (
-                  <div key={msg._id} className={cn("flex gap-2", isOwn ? "justify-end" : "justify-start")}>
+                  <div 
+                    key={msg._id} 
+                    className={cn(
+                      "flex gap-2", 
+                      isOwn ? "justify-end" : "justify-start",
+                      isFirstInSequence ? "mt-4" : "mt-1"
+                    )}
+                  >
                     {!isOwn && (
-                      <Avatar className={cn("h-8 w-8 mt-auto", !showAvatar && "opacity-0")}>
-                        <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
-                        <AvatarFallback className="text-xs">{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
-                      </Avatar>
+                      <div className="w-8 flex-shrink-0 flex flex-col justify-end">
+                        {showAvatar && (
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
+                            <AvatarFallback className="text-xs">{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
                     )}
 
-                    <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start", "max-w-[75%]")}>
+                    <div className={cn("flex flex-col max-w-[75%] md:max-w-[60%]", isOwn ? "items-end" : "items-start")}>
                       <div
                         className={cn(
-                          "px-4 py-2.5 rounded-2xl break-words",
+                          "px-4 py-2 shadow-sm text-[15px] leading-relaxed break-words",
                           isOwn
-                            ? "bg-blue-600 text-white rounded-br-md"
-                            : "bg-card border border-border rounded-bl-md",
+                            ? "bg-blue-600 text-white rounded-2xl rounded-tr-sm"
+                            : "bg-white dark:bg-zinc-800 text-foreground border border-border/40 rounded-2xl rounded-tl-sm",
+                          !isLastInSequence && isOwn && "rounded-br-sm",
+                          !isLastInSequence && !isOwn && "rounded-bl-sm",
                           msg.sending && "opacity-60",
                         )}
                       >
                         <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                       </div>
                       {showTime && (
-                        <span className="text-xs text-muted-foreground mt-1 px-1">
+                        <span className={cn("text-[10px] text-muted-foreground mt-1 px-1 select-none", isOwn ? "text-right" : "text-left")}>
                           {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
                           {msg.sending && " • Sending..."}
                         </span>
                       )}
                     </div>
-
-                    {isOwn && <div className="w-8" />}
                   </div>
                 )
               })}
@@ -231,17 +259,17 @@ export default function ChatPage({ friendId }) {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="p-4 border-t border-border bg-card shadow-sm">
-        <div className="flex gap-2">
+      <form onSubmit={handleSend} className="p-3 border-t border-border bg-background">
+        <div className="flex gap-2 items-center max-w-4xl mx-auto">
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1"
+            placeholder="Message..."
+            className="flex-1 rounded-full bg-muted/50 border-transparent focus:border-blue-600 focus:bg-background transition-all h-11"
             disabled={isSending}
             autoFocus
           />
-          <Button type="submit" disabled={!message.trim() || isSending} size="icon" className="h-10 w-10">
+          <Button type="submit" disabled={!message.trim() || isSending} size="icon" className="h-11 w-11 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 shadow-md">
             {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </Button>
         </div>
