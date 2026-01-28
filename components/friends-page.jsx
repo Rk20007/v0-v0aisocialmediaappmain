@@ -139,7 +139,7 @@ export default function FriendsPage() {
       )
     }
     return (
-      <Button size="sm" onClick={() => sendRequest(u._id)} className="gap-1">
+      <Button size="sm" onClick={() => sendRequest(u._id)} className="gap-1 bg-[#c9424a] hover:bg-[#a0353b] text-white">
         <UserPlus className="h-4 w-4" />
         Add
       </Button>

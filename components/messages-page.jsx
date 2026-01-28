@@ -78,11 +78,11 @@ export default function MessagesPage() {
 
       {/* Active Conversations */}
       {filteredConversations.length > 0 && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-4 mb-4">
           <h2 className="text-sm font-medium text-muted-foreground px-2">Active Chats</h2>
           {filteredConversations.map((conv) => (
             <Link key={conv.friendId} href={`/messages/${conv.friendId}`}>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01]">
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01] mb-2">
                 <CardContent className="py-3">
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -119,11 +119,11 @@ export default function MessagesPage() {
 
       {/* Other Users to start chat with */}
       {filteredOtherUsers.length > 0 && (
-        <div className="space-y-2 pt-2 mb-4">
+        <div className="space-y-4 pt-2 mb-4">
           <h2 className="text-sm font-medium text-muted-foreground px-2">Start a New Chat</h2>
           {filteredOtherUsers.map((user) => (
             <Link key={user._id} href={`/messages/${user._id}`}>
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01] mb-1">
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-[1.01] mb-2">
                 <CardContent className="py-3">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">

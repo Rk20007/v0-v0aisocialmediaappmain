@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal } from "lucide-react"
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Download, Maximize2 } from "lucide-react"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
@@ -17,6 +17,8 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
   const [comment, setComment] = useState("")
   const [comments, setComments] = useState(post.comments || [])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
+  const [showFullView, setShowFullView] = useState(false)
 
   const handleLike = async () => {
     setIsLiked(!isLiked)
@@ -54,6 +56,40 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
     }
   }
 
+  const handleDownload = async () => {
+    setShowMenu(false)
+    if (!post.imageUrl) return
+    try {
+      const response = await fetch(post.imageUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `post-${post._id}-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      window.open(post.imageUrl, '_blank')
+    }
+  }
+
+  const handleShare = async () => {
+    setShowMenu(false)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by ${post.user?.name}`,
+          text: post.caption || 'Check out this post on Colorcode',
+          url: window.location.href
+        })
+      } catch (err) {
+        // Share cancelled
+      }
+    }
+  }
+
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
 
   return (
@@ -73,18 +109,44 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
           </Link>
           <p className="text-xs text-muted-foreground">{timeAgo}</p>
         </div>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        
+        <div className="relative">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowMenu(!showMenu)}>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+          
+          {showMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-1">
+                <button onClick={handleShare} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
+                  <Share2 className="h-4 w-4 text-muted-foreground" />
+                  Share Post
+                </button>
+                <button onClick={handleDownload} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
+                  <Download className="h-4 w-4 text-muted-foreground" />
+                  Download Image
+                </button>
+                <button onClick={() => {
+                  setShowFullView(true)
+                  setShowMenu(false)
+                }} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
+                  <Maximize2 className="h-4 w-4 text-muted-foreground" />
+                  Full View
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </CardHeader>
 
       <CardContent className="px-4 pb-2">
         {post.caption && <p className="text-sm mb-3 whitespace-pre-wrap">{post.caption}</p>}
 
         {post.imageUrl && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <div className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
+          <Dialog open={showFullView} onOpenChange={setShowFullView}>
+            
+              <div onClick={() => setShowFullView(true)} className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
                 <img
                   src={post.imageUrl || "/placeholder.svg"}
                   alt="Post"
@@ -92,7 +154,7 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
                   loading="lazy"
                 />
               </div>
-            </DialogTrigger>
+            
             <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/90 border-none sm:max-w-fit focus:outline-none">
               <DialogTitle className="sr-only">View Post Image</DialogTitle>
               <div className="relative flex items-center justify-center h-full max-h-[70vh] w-full p-2">
@@ -135,7 +197,7 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
             </button>
           </div>
 
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={handleShare} className="text-muted-foreground hover:text-foreground transition-colors">
             <Share2 className="h-5 w-5" />
           </button>
         </div>

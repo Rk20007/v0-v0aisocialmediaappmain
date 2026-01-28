@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Sparkles, Loader2, X, Send, Image, Plus, Camera, FolderOpen, Download, Edit, Share2, ChevronDown } from "lucide-react"
+import { Sparkles, Loader2, X, Send, Image, Plus, Camera, FolderOpen, Download, Edit, Share2, ChevronDown, Maximize2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 export default function CreatePage() {
   const router = useRouter()
@@ -23,6 +24,8 @@ export default function CreatePage() {
   const [isPosting, setIsPosting] = useState(false)
   const [useUniform, setUseUniform] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
+  const [showPostForm, setShowPostForm] = useState(false)
+  const [showFullView, setShowFullView] = useState(false)
 
   // Load saved data from memory on mount
   useEffect(() => {
@@ -111,6 +114,7 @@ export default function CreatePage() {
 
     setIsGenerating(true)
     setShowEditForm(false)
+    setShowPostForm(false)
     try {
       const body = {
         topic: finalPrompt,
@@ -272,10 +276,18 @@ export default function CreatePage() {
         description: "Image saved successfully",
       })
     } catch (error) {
+      // Fallback: Try opening in new tab if fetch fails (e.g. CORS)
+      const link = document.createElement('a')
+      link.href = imageSrc
+      link.target = "_blank"
+      link.download = `blue-class-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
       toast({
-        title: "Download Failed",
-        description: "Unable to download image",
-        variant: "destructive",
+        title: "Opened in new tab",
+        description: "Please save the image manually",
       })
     }
   }
@@ -305,6 +317,7 @@ export default function CreatePage() {
 
   const handleEdit = () => {
     setShowEditForm(true)
+    setShowPostForm(false)
   }
 
   const clearAllData = () => {
@@ -587,8 +600,11 @@ export default function CreatePage() {
           <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
             <CardContent className="p-0">
               {/* Generated Image */}
-              <div className="relative group">
-                <div className="absolute top-4 right-4 z-10">
+              <div className="relative group bg-gray-50">
+                <div className="absolute top-4 right-4 z-10 flex gap-2">
+                  <button onClick={() => setShowFullView(true)} className="p-2 bg-black/50 hover:bg-[#c9424a] text-white rounded-full backdrop-blur-md transition-all shadow-lg">
+                    <Maximize2 className="h-5 w-5" />
+                  </button>
                   <button onClick={clearAllData} className="p-2 bg-black/50 hover:bg-red-500 text-white rounded-full backdrop-blur-md transition-all shadow-lg">
                     <X className="h-5 w-5" />
                   </button>
@@ -596,13 +612,29 @@ export default function CreatePage() {
                 <img
                   src={imageSrc}
                   alt="Generated AI Image"
-                  className="w-full aspect-square object-cover"
+                  className="w-full h-auto max-h-[75vh] object-contain"
                 />
               </div>
 
+              {/* Full View Modal */}
+              <Dialog open={showFullView} onOpenChange={setShowFullView}>
+                <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/90 border-none sm:max-w-fit focus:outline-none">
+                  <DialogTitle className="sr-only">View Generated Image</DialogTitle>
+                  <div className="relative flex items-center justify-center h-full max-h-[90vh] w-full p-2">
+                    <img src={imageSrc} alt="Generated Full" className="max-h-[85vh] w-auto object-contain rounded-md" />
+                    <button 
+                      onClick={() => setShowFullView(false)}
+                      className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-white/20 text-white rounded-full transition-colors"
+                    >
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               {/* Action Buttons */}
               <div className="p-6 bg-gradient-to-br from-[#c9424a]/5 to-[#c9424a]/10">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-2">
                   <button
                     onClick={handleShare}
                     className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-[#c9424a]/60 rounded-2xl hover:bg-[#c9424a]/5 transition-all active:scale-95 shadow-md"
@@ -632,8 +664,87 @@ export default function CreatePage() {
                     </div>
                     <span className="text-sm font-bold text-[#4a181b]">Download</span>
                   </button>
+                  <button
+                    onClick={() => setShowPostForm(true)}
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-[#c9424a]/60 rounded-2xl hover:bg-[#c9424a]/5 transition-all active:scale-95 shadow-md"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center shadow-lg">
+                      <Send className="h-6 w-6 text-white" />
+                    </div>
+                    <span className="text-sm font-bold text-[#4a181b]">Post</span>
+                  </button>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Post Form - Simple Version */}
+        {showPostForm && imageSrc && (
+          <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
+            <CardContent className="p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold text-[#2d0f11] flex items-center gap-2">
+                  <Send className="h-6 w-6 text-[#c9424a]" />
+                  Finalize Post
+                </h3>
+                <button
+                  onClick={() => setShowPostForm(false)}
+                  className="p-2 hover:bg-[#c9424a]/5 rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5 text-[#c9424a]" />
+                </button>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border border-[#c9424a]/30 flex-shrink-0">
+                  <img src={imageSrc} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="post-caption" className="text-sm font-bold text-[#4a181b]">
+                    Caption
+                  </Label>
+                  <textarea
+                    id="post-caption"
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    placeholder="Write a caption..."
+                    className="w-full h-20 resize-none text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-2 transition-all"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="post-tags" className="text-sm font-bold text-[#4a181b]">
+                  Tags (comma separated)
+                </Label>
+                <Input
+                  id="post-tags"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="#art, #ai, #fashion"
+                  className="h-12 text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl px-4"
+                />
+              </div>
+
+              <Button 
+                onClick={handlePost} 
+                disabled={isPosting} 
+                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-[#c9424a] to-[#e06b72] hover:from-[#a0353b] hover:to-[#c9424a] transition-all shadow-lg hover:scale-105 rounded-xl"
+              >
+                {isPosting ? (
+                  <>
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    Posting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-6 w-6" />
+                    Share to Feed 🚀
+                  </>
+                )}
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -645,7 +756,7 @@ export default function CreatePage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-[#2d0f11] flex items-center gap-2">
                   <Edit className="h-6 w-6 text-[#c9424a]" />
-                  Edit & Regenerate
+                  Edit Prompt
                 </h3>
                 <button
                   onClick={() => setShowEditForm(false)}
@@ -700,35 +811,6 @@ export default function CreatePage() {
                 </div>
               </div>
 
-              {/* Caption & Tags */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-caption" className="text-sm font-bold text-[#4a181b] flex items-center gap-2">
-                    <span className="text-lg">💬</span> Caption (Optional)
-                  </Label>
-                  <textarea
-                    id="edit-caption"
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    placeholder="Write something..."
-                    className="w-full min-h-20 resize-none text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-3 transition-all"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="edit-tags" className="text-sm font-bold text-[#4a181b] flex items-center gap-2">
-                    <span className="text-lg">#️⃣</span> Tags (Optional)
-                  </Label>
-                  <Input
-                    id="edit-tags"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    placeholder="#art, #ai, #fashion"
-                    className="h-12 text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl px-4"
-                  />
-                </div>
-              </div>
-
               {/* Regenerate Button */}
               <div className="grid grid-cols-2 gap-3">
                 <Button
@@ -756,25 +838,6 @@ export default function CreatePage() {
                   )}
                 </Button>
               </div>
-
-              {/* Post Button */}
-              <Button 
-                onClick={handlePost} 
-                disabled={isPosting} 
-                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-[#c9424a] to-[#e06b72] hover:from-[#a0353b] hover:to-[#c9424a] transition-all shadow-lg hover:scale-105 rounded-xl"
-              >
-                {isPosting ? (
-                  <>
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    Posting...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-6 w-6" />
-                    Share to Feed 🚀
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
         )}
