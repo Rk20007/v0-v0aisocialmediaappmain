@@ -44,7 +44,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#c9424a]" />
       </div>
     )
   }
@@ -53,11 +53,11 @@ export default function ProfilePage() {
     <div className="pb-4">
       {/* Cover & Avatar */}
       <div className="relative">
-        <div className="h-32 bg-gradient-to-r from-blue-600/30 to-blue-400/30" />
+        <div className="h-32 bg-gradient-to-r from-[#c9424a]/30 to-[#e06b72]/30" />
         <div className="absolute -bottom-12 left-4">
           <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
             <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-            <AvatarFallback className="text-2xl bg-blue-600/10 text-blue-600">
+            <AvatarFallback className="text-2xl bg-[#c9424a]/10 text-[#c9424a]">
               {user.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -131,7 +131,7 @@ export default function ProfilePage() {
         <TabsContent value="posts" className="mt-4">
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#c9424a]" />
             </div>
           ) : posts.length === 0 ? (
             <Card className="border-0 shadow-lg">

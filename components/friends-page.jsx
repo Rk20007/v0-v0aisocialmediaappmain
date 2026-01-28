@@ -185,7 +185,7 @@ export default function FriendsPage() {
         <TabsContent value="discover" className="mt-4">
           {isLoadingUsers ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#c9424a]" />
             </div>
           ) : filteredUsers.length === 0 ? (
             <Card className="border-0 shadow-lg">

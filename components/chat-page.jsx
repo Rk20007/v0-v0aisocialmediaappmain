@@ -167,7 +167,7 @@ export default function ChatPage({ friendId }) {
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-[#c9424a]/10 dark:bg-[#c9424a]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
                   <AvatarFallback>{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
@@ -233,7 +233,7 @@ export default function ChatPage({ friendId }) {
                         className={cn(
                           "px-4 py-2 shadow-sm text-[15px] leading-relaxed break-words",
                           isOwn
-                            ? "bg-blue-600 text-white rounded-2xl rounded-tr-sm"
+                            ? "bg-[#c9424a] text-white rounded-2xl rounded-tr-sm"
                             : "bg-white dark:bg-zinc-800 text-foreground border border-border/40 rounded-2xl rounded-tl-sm",
                           !isLastInSequence && isOwn && "rounded-br-sm",
                           !isLastInSequence && !isOwn && "rounded-bl-sm",
@@ -265,11 +265,11 @@ export default function ChatPage({ friendId }) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Message..."
-            className="flex-1 rounded-full bg-muted/50 border-transparent focus:border-blue-600 focus:bg-background transition-all h-11"
+            className="flex-1 rounded-full bg-muted/50 border-transparent focus:border-[#c9424a] focus:bg-background transition-all h-11"
             disabled={isSending}
             autoFocus
           />
-          <Button type="submit" disabled={!message.trim() || isSending} size="icon" className="h-11 w-11 rounded-full shrink-0 bg-blue-600 hover:bg-blue-700 shadow-md">
+          <Button type="submit" disabled={!message.trim() || isSending} size="icon" className="h-11 w-11 rounded-full shrink-0 bg-[#c9424a] hover:bg-[#a0353b] shadow-md">
             {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
           </Button>
         </div>

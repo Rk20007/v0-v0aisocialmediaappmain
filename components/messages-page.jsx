@@ -78,7 +78,7 @@ export default function MessagesPage() {
 
       {/* Active Conversations */}
       {filteredConversations.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2 mb-4">
           <h2 className="text-sm font-medium text-muted-foreground px-2">Active Chats</h2>
           {filteredConversations.map((conv) => (
             <Link key={conv.friendId} href={`/messages/${conv.friendId}`}>

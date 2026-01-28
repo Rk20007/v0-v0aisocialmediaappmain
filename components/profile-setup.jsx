@@ -110,15 +110,15 @@ export default function ProfileSetup() {
               {/* Avatar Section */}
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
-                  <Avatar className="h-28 w-28 border-4 border-blue-600/20">
+                  <Avatar className="h-28 w-28 border-4 border-[#c9424a]/20">
                     <AvatarImage src={formData.avatar || "/placeholder.svg"} alt="Profile" />
-                    <AvatarFallback className="text-2xl bg-blue-600/10 text-blue-600">
+                    <AvatarFallback className="text-2xl bg-[#c9424a]/10 text-[#c9424a]">
                       {formData.name?.charAt(0)?.toUpperCase() || "?"}
                     </AvatarFallback>
                   </Avatar>
                   <button
                     type="button"
-                    className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+                    className="absolute bottom-0 right-0 p-2 bg-[#c9424a] text-white rounded-full shadow-lg hover:bg-[#a0353b] transition-colors"
                     onClick={() => document.getElementById("avatar-input").click()}
                   >
                     <Camera className="h-4 w-4" />
@@ -198,7 +198,7 @@ export default function ProfileSetup() {
                     <Badge
                       key={interest}
                       variant="outline"
-                      className={`cursor-pointer text-sm py-1.5 px-3 transition-all ${formData.interests.includes(interest) ? "bg-blue-600 text-white border-blue-600" : "hover:border-blue-600"}`}
+                      className={`cursor-pointer text-sm py-1.5 px-3 transition-all ${formData.interests.includes(interest) ? "bg-[#c9424a] text-white border-[#c9424a]" : "hover:border-[#c9424a]"}`}
                       onClick={() => handleInterestToggle(interest)}
                     >
                       {interest}
@@ -210,7 +210,7 @@ export default function ProfileSetup() {
 
               {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
-              <Button type="submit" className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white" disabled={isLoading}>
+              <Button type="submit" className="w-full h-12 text-lg font-semibold bg-[#c9424a] hover:bg-[#a0353b] text-white" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />

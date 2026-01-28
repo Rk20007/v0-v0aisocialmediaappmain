@@ -60,9 +60,9 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
     <Card className="border-0 shadow-lg overflow-hidden animate-fade-in">
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
         <Link href={`/user/${post.userId}`}>
-          <Avatar className="h-10 w-10 border-2 border-blue-600/20 cursor-pointer hover:border-blue-600 transition-colors">
+          <Avatar className="h-10 w-10 border-2 border-[#c9424a]/20 cursor-pointer hover:border-[#c9424a] transition-colors">
             <AvatarImage src={post.user?.avatar || "/placeholder.svg"} alt={post.user?.name} />
-            <AvatarFallback className="bg-blue-600/10 text-blue-600 text-sm">
+            <AvatarFallback className="bg-[#c9424a]/10 text-[#c9424a] text-sm">
               {post.user?.name?.charAt(0)?.toUpperCase() || "?"}
             </AvatarFallback>
           </Avatar>
@@ -105,7 +105,7 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
         {post.tags?.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {post.tags.map((tag, i) => (
-              <span key={i} className="text-xs text-blue-600 font-medium">
+              <span key={i} className="text-xs text-[#c9424a] font-medium">
                 #{tag}
               </span>
             ))}
@@ -120,10 +120,10 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
               <Heart
                 className={cn(
                   "h-5 w-5 transition-all",
-                  isLiked ? "fill-blue-600 text-blue-600 scale-110" : "text-muted-foreground",
+                  isLiked ? "fill-[#c9424a] text-[#c9424a] scale-110" : "text-muted-foreground",
                 )}
               />
-              <span className={cn("text-sm font-medium", isLiked && "text-blue-600")}>{likesCount}</span>
+              <span className={cn("text-sm font-medium", isLiked && "text-[#c9424a]")}>{likesCount}</span>
             </button>
 
             <button

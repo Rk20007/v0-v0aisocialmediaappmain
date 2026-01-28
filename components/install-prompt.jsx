@@ -80,7 +80,7 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-50 animate-in slide-in-from-bottom-4">
-      <Card className="border-0 shadow-xl bg-gradient-to-r from-blue-600 to-teal-500">
+      <Card className="border-0 shadow-xl bg-gradient-to-r from-[#c9424a] to-[#e06b72]">
         <CardContent className="p-4">
           <button onClick={handleDismiss} className="absolute top-2 right-2 text-white/70 hover:text-white">
             <X className="h-5 w-5" />
@@ -110,7 +110,7 @@ export default function InstallPrompt() {
                 <>
                   <p className="text-white/90 text-sm mb-3">Install the app for the best experience - works offline!</p>
                   <div className="flex gap-2">
-                    <Button onClick={handleInstall} size="sm" className="bg-white text-blue-600 hover:bg-white/90">
+                    <Button onClick={handleInstall} size="sm" className="bg-white text-[#c9424a] hover:bg-white/90">
                       <Download className="h-4 w-4 mr-1" />
                       Install App
                     </Button>

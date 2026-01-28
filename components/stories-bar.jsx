@@ -126,11 +126,11 @@ export default function StoriesBar() {
         {/* Add Story Button */}
         <button onClick={() => setShowUpload(true)} className="flex-shrink-0 flex flex-col items-center gap-1.5">
           <div className="relative">
-            <Avatar className="h-16 w-16 ring-2 ring-blue-600">
+            <Avatar className="h-16 w-16 ring-2 ring-[#c9424a]">
               <AvatarImage src={user?.avatar || "/placeholder.svg"} />
               <AvatarFallback>{user?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-blue-600 text-white flex items-center justify-center">
+            <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-[#c9424a] text-white flex items-center justify-center">
               <Plus className="h-4 w-4" />
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function StoriesBar() {
               <div
                 className={cn(
                   "p-0.5 rounded-full",
-                  isOwn ? "bg-muted" : allViewed ? "bg-muted" : "bg-gradient-to-tr from-blue-600 to-blue-400",
+                  isOwn ? "bg-muted" : allViewed ? "bg-muted" : "bg-gradient-to-tr from-[#c9424a] to-[#e06b72]",
                 )}
               >
                 <Avatar className="h-16 w-16 ring-2 ring-background">
@@ -190,8 +190,8 @@ export default function StoriesBar() {
               className={cn(
                 "relative aspect-[9/16] max-h-[400px] rounded-xl overflow-hidden border-2 border-dashed cursor-pointer transition-colors",
                 selectedFile
-                  ? "border-blue-600 bg-black"
-                  : "border-muted-foreground/30 bg-muted/50 hover:border-blue-600/50",
+                  ? "border-[#c9424a] bg-black"
+                  : "border-muted-foreground/30 bg-muted/50 hover:border-[#c9424a]/50",
               )}
             >
               {previewUrl ? (
@@ -219,11 +219,11 @@ export default function StoriesBar() {
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
                   <div className="flex gap-2 mb-3">
-                    <div className="p-3 rounded-full bg-blue-600/10">
-                      <ImageIcon className="h-8 w-8 text-blue-600" />
+                    <div className="p-3 rounded-full bg-[#c9424a]/10">
+                      <ImageIcon className="h-8 w-8 text-[#c9424a]" />
                     </div>
-                    <div className="p-3 rounded-full bg-blue-600/10">
-                      <Video className="h-8 w-8 text-blue-600" />
+                    <div className="p-3 rounded-full bg-[#c9424a]/10">
+                      <Video className="h-8 w-8 text-[#c9424a]" />
                     </div>
                   </div>
                   <p className="font-medium">Tap to select media</p>

@@ -317,39 +317,39 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#4a181b] via-[#7d292e] to-[#4a181b] p-4 relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500 rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
-        <div className="absolute top-40 right-10 w-96 h-96 bg-indigo-500 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
+        <div className="absolute top-20 left-10 w-96 h-96 bg-[#c9424a] rounded-full mix-blend-overlay filter blur-3xl animate-blob"></div>
+        <div className="absolute top-40 right-10 w-96 h-96 bg-[#c9424a] rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-[#c9424a] rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Generating Popup Modal */}
       {isGenerating && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in">
-          <div className="bg-white rounded-3xl p-10 max-w-md mx-4 text-center shadow-2xl animate-scale-in border-4 border-blue-300">
+          <div className="bg-white rounded-3xl p-10 max-w-md mx-4 text-center shadow-2xl animate-scale-in border-4 border-[#c9424a]/60">
             <div className="mb-8 relative">
-              <div className="w-32 h-32 mx-auto bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 rounded-full flex items-center justify-center animate-pulse-scale shadow-2xl">
+              <div className="w-32 h-32 mx-auto bg-gradient-to-br from-[#c9424a] via-[#a0353b] to-[#4a181b] rounded-full flex items-center justify-center animate-pulse-scale shadow-2xl">
                 <Sparkles className="h-16 w-16 text-white animate-spin-slow" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-40 h-40 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-40 h-40 border-4 border-[#c9424a]/60 border-t-transparent rounded-full animate-spin"></div>
               </div>
             </div>
-            <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent mb-4">
+            <h3 className="text-3xl font-bold bg-gradient-to-r from-[#c9424a] to-[#a0353b] bg-clip-text text-transparent mb-4">
               Generating Image
             </h3>
-            <p className="text-xl font-semibold text-blue-900 mb-2">
+            <p className="text-xl font-semibold text-[#4a181b] mb-2">
               कृपया प्रतीक्षा करें...
             </p>
-            <p className="text-lg text-blue-700 mb-6">
+            <p className="text-lg text-[#a0353b] mb-6">
               Please wait, creating magic ✨
             </p>
             <div className="flex gap-3 justify-center">
-              <div className="w-4 h-4 bg-blue-600 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-4 h-4 bg-indigo-600 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-4 h-4 bg-blue-700 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '300ms' }}></div>
+              <div className="w-4 h-4 bg-[#c9424a] rounded-full animate-bounce shadow-lg" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-4 h-4 bg-[#a0353b] rounded-full animate-bounce shadow-lg" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-4 h-4 bg-[#c9424a] rounded-full animate-bounce shadow-lg" style={{ animationDelay: '300ms' }}></div>
             </div>
           </div>
         </div>
@@ -362,49 +362,49 @@ export default function CreatePage() {
           <CardContent className="p-6 space-y-6">
             {/* Character Image Upload */}
             <div className="space-y-4">
-              <Label className="text-lg font-bold flex items-center gap-2 text-blue-950">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md">
+              <Label className="text-lg font-bold flex items-center gap-2 text-[#2d0f11]">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#c9424a] to-[#a0353b] rounded-lg flex items-center justify-center shadow-md">
                   <Image className="h-5 w-5 text-white" />
                 </div>
                 Face Picture
-                <span className="text-xs text-blue-700 font-semibold bg-blue-100 px-2 py-0.5 rounded-full">Required</span>
+                <span className="text-xs text-[#a0353b] font-semibold bg-[#c9424a]/10 px-2 py-0.5 rounded-full">Required</span>
               </Label>
               
               {!characterImage ? (
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-40 h-40 rounded-full border-4 border-dashed border-blue-400 bg-blue-50 flex items-center justify-center shadow-inner">
+                  <div className="w-40 h-40 rounded-full border-4 border-dashed border-[#c9424a]/60 bg-[#c9424a]/5 flex items-center justify-center shadow-inner">
                     <div className="text-center">
-                      <Camera className="h-12 w-12 text-blue-500 mx-auto mb-2" />
-                      <p className="text-xs text-blue-600 font-medium">Preview</p>
+                      <Camera className="h-12 w-12 text-[#c9424a] mx-auto mb-2" />
+                      <p className="text-xs text-[#c9424a] font-medium">Preview</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <button
                       onClick={() => document.getElementById("gallery-input")?.click()}
-                      className="flex flex-col items-center gap-2 p-4 border-2 border-blue-400 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 transition-all active:scale-95 shadow-md"
+                      className="flex flex-col items-center gap-2 p-4 border-2 border-[#c9424a]/60 rounded-2xl bg-gradient-to-br from-[#c9424a]/5 to-[#c9424a]/10 hover:from-[#c9424a]/10 hover:to-[#c9424a]/20 transition-all active:scale-95 shadow-md"
                     >
-                      <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 rounded-full bg-[#c9424a] flex items-center justify-center shadow-lg">
                         <FolderOpen className="h-6 w-6 text-white" />
                       </div>
-                      <span className="text-sm font-bold text-blue-900">Gallery</span>
+                      <span className="text-sm font-bold text-[#4a181b]">Gallery</span>
                     </button>
                     
                     <button
-                      onClick={() => document.getElementById("gallery-input")?.click()}
-                      className="flex flex-col items-center gap-2 p-4 border-2 border-indigo-400 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 hover:from-indigo-100 hover:to-indigo-200 transition-all active:scale-95 shadow-md"
+                      onClick={() => document.getElementById("gallery-input")?.click()} // Reusing gallery input for simplicity as per original
+                      className="flex flex-col items-center gap-2 p-4 border-2 border-[#c9424a]/60 rounded-2xl bg-gradient-to-br from-[#c9424a]/5 to-[#c9424a]/10 hover:from-[#c9424a]/10 hover:to-[#c9424a]/20 transition-all active:scale-95 shadow-md"
                     >
-                      <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 rounded-full bg-[#c9424a] flex items-center justify-center shadow-lg">
                         <Camera className="h-6 w-6 text-white" />
                       </div>
-                      <span className="text-sm font-bold text-blue-900">Selfie</span>
+                      <span className="text-sm font-bold text-[#4a181b]">Selfie</span>
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4">
                   <div className="relative">
-                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-blue-500 shadow-xl animate-scale-in">
+                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#c9424a] shadow-xl animate-scale-in">
                       <img 
                         src={characterImage} 
                         alt="Character" 
@@ -422,17 +422,17 @@ export default function CreatePage() {
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <button
                       onClick={() => document.getElementById("gallery-input")?.click()}
-                      className="flex items-center justify-center gap-2 p-3 border-2 border-blue-400 rounded-xl bg-white hover:bg-blue-50 transition-all text-sm font-semibold text-blue-900 shadow-sm"
+                      className="flex items-center justify-center gap-2 p-3 border-2 border-[#c9424a]/60 rounded-xl bg-white hover:bg-[#c9424a]/5 transition-all text-sm font-semibold text-[#4a181b] shadow-sm"
                     >
-                      <FolderOpen className="h-4 w-4 text-blue-600" />
+                      <FolderOpen className="h-4 w-4 text-[#c9424a]" />
                       Change
                     </button>
                     
                     <button
                       onClick={() => document.getElementById("gallery-input")?.click()}
-                      className="flex items-center justify-center gap-2 p-3 border-2 border-indigo-400 rounded-xl bg-white hover:bg-indigo-50 transition-all text-sm font-semibold text-blue-900 shadow-sm"
+                      className="flex items-center justify-center gap-2 p-3 border-2 border-[#c9424a]/60 rounded-xl bg-white hover:bg-[#c9424a]/5 transition-all text-sm font-semibold text-[#4a181b] shadow-sm"
                     >
-                      <Camera className="h-4 w-4 text-indigo-600" />
+                      <Camera className="h-4 w-4 text-[#c9424a]" />
                       Retake
                     </button>
                   </div>
@@ -450,17 +450,17 @@ export default function CreatePage() {
 
             {/* Uniform Toggle & Upload */}
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200 shadow-sm">
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-[#c9424a]/5 to-[#c9424a]/10 rounded-xl border border-[#c9424a]/30 shadow-sm">
                 <input 
                   type="checkbox" 
                   id="useUniform"
                   checked={useUniform}
                   onChange={(e) => setUseUniform(e.target.checked)}
-                  className="w-5 h-5 rounded border-blue-300 text-blue-700 focus:ring-blue-600"
+                  className="w-5 h-5 rounded border-[#c9424a]/50 text-[#a0353b] focus:ring-[#c9424a]"
                 />
-                <Label htmlFor="useUniform" className="text-sm font-semibold text-blue-900 flex-1 cursor-pointer">
+                <Label htmlFor="useUniform" className="text-sm font-semibold text-[#4a181b] flex-1 cursor-pointer">
                   Add Uniform / Dress Reference
-                  <span className="block text-xs text-blue-600 font-normal">Optional</span>
+                  <span className="block text-xs text-[#c9424a] font-normal">Optional</span>
                 </Label>
               </div>
               
@@ -469,18 +469,18 @@ export default function CreatePage() {
                   {!uniformImageSrc ? (
                     <div 
                       onClick={() => document.getElementById("uniform-input")?.click()}
-                      className="relative h-28 border-2 border-dashed border-blue-400 rounded-2xl flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 transition-all cursor-pointer group mt-2 shadow-inner"
+                      className="relative h-28 border-2 border-dashed border-[#c9424a]/60 rounded-2xl flex flex-col items-center justify-center bg-[#c9424a]/5 hover:bg-[#c9424a]/10 transition-all cursor-pointer group mt-2 shadow-inner"
                     >
                       <div className="relative flex flex-col items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-blue-600 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform text-white">
+                        <div className="w-10 h-10 rounded-full bg-[#c9424a] shadow-md flex items-center justify-center group-hover:scale-110 transition-transform text-white">
                           <Plus className="h-5 w-5" />
                         </div>
-                        <p className="text-xs font-bold text-blue-900">Add Uniform</p>
+                        <p className="text-xs font-bold text-[#4a181b]">Add Uniform</p>
                       </div>
                     </div>
                   ) : (
                     <div className="relative group">
-                      <div className="h-40 rounded-2xl overflow-hidden border-2 border-blue-500 shadow-lg animate-scale-in">
+                      <div className="h-40 rounded-2xl overflow-hidden border-2 border-[#c9424a] shadow-lg animate-scale-in">
                         <img 
                           src={uniformImageSrc} 
                           alt="Uniform" 
@@ -508,8 +508,8 @@ export default function CreatePage() {
 
             {/* Single Unified Prompt Dropdown */}
             <div className="space-y-3">
-              <Label htmlFor="prompt-dropdown" className="text-lg font-bold flex items-center gap-2 text-blue-950">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-md">
+              <Label htmlFor="prompt-dropdown" className="text-lg font-bold flex items-center gap-2 text-[#2d0f11]">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#c9424a] to-[#e06b72] rounded-lg flex items-center justify-center shadow-md">
                   <Sparkles className="h-5 w-5 text-white" />
                 </div>
                 Select Style Prompt
@@ -522,7 +522,7 @@ export default function CreatePage() {
                     setTopic(e.target.value)
                     setManualPrompt("")
                   }}
-                  className="w-full h-14 text-base font-medium border-2 border-blue-200 focus:border-blue-600 rounded-xl shadow-sm transition-all px-4 pr-10 bg-white appearance-none cursor-pointer"
+                  className="w-full h-14 text-base font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl shadow-sm transition-all px-4 pr-10 bg-white appearance-none cursor-pointer"
                 >
                   <option value="">-- Select a Style --</option>
                   {allPrompts.map((category) => (
@@ -533,14 +533,14 @@ export default function CreatePage() {
                     </optgroup>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-400 pointer-events-none" />
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#e06b72] pointer-events-none" />
               </div>
             </div>
 
             {/* Manual Prompt Input */}
             <div className="space-y-3">
-              <Label htmlFor="manual-prompt" className="text-lg font-bold flex items-center gap-2 text-blue-950">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-600 rounded-lg flex items-center justify-center shadow-md">
+              <Label htmlFor="manual-prompt" className="text-lg font-bold flex items-center gap-2 text-[#2d0f11]">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#c9424a] to-[#e06b72] rounded-lg flex items-center justify-center shadow-md">
                   <Edit className="h-5 w-5 text-white" />
                 </div>
                 Or Write Your Own Prompt
@@ -553,9 +553,9 @@ export default function CreatePage() {
                   if (e.target.value.trim()) setTopic("")
                 }}
                 placeholder="अपना खुद का prompt लिखें... (e.g., नीली साड़ी में खूबसूरत लड़की)"
-                className="w-full min-h-24 resize-none text-base font-medium border-2 border-blue-200 focus:border-blue-600 rounded-xl p-4 transition-all shadow-sm"
+                className="w-full min-h-24 resize-none text-base font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-4 transition-all shadow-sm"
               />
-              <p className="text-xs text-blue-600 italic">
+              <p className="text-xs text-[#c9424a] italic">
                 💡 Tip: Be descriptive for better results
               </p>
             </div>
@@ -564,7 +564,7 @@ export default function CreatePage() {
             <Button
               onClick={handleGenerate}
               disabled={isGenerating || (!topic && !manualPrompt.trim()) || !characterImage}
-              className="w-full h-16 gap-3 text-xl font-bold bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-900 hover:from-blue-800 hover:via-blue-900 hover:to-indigo-950 transition-all shadow-xl hover:shadow-blue-600/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 rounded-xl mt-2"
+              className="w-full h-16 gap-3 text-xl font-bold bg-gradient-to-r from-[#a0353b] via-[#7d292e] to-[#4a181b] hover:from-[#7d292e] hover:via-[#4a181b] hover:to-[#2d0f11] transition-all shadow-xl hover:shadow-[#c9424a]/50 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 rounded-xl mt-2"
             >
               {isGenerating ? (
                 <>
@@ -601,36 +601,36 @@ export default function CreatePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50">
+              <div className="p-6 bg-gradient-to-br from-[#c9424a]/5 to-[#c9424a]/10">
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={handleShare}
-                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-blue-400 rounded-2xl hover:bg-blue-50 transition-all active:scale-95 shadow-md"
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-[#c9424a]/60 rounded-2xl hover:bg-[#c9424a]/5 transition-all active:scale-95 shadow-md"
                   >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c9424a] to-[#a0353b] flex items-center justify-center shadow-lg">
                       <Share2 className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-blue-900">Share</span>
+                    <span className="text-sm font-bold text-[#4a181b]">Share</span>
                   </button>
 
                   <button
                     onClick={handleEdit}
-                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-indigo-400 rounded-2xl hover:bg-indigo-50 transition-all active:scale-95 shadow-md"
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-[#c9424a]/60 rounded-2xl hover:bg-[#c9424a]/5 transition-all active:scale-95 shadow-md"
                   >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c9424a] to-[#a0353b] flex items-center justify-center shadow-lg">
                       <Edit className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-blue-900">Edit</span>
+                    <span className="text-sm font-bold text-[#4a181b]">Edit</span>
                   </button>
 
                   <button
                     onClick={handleDownload}
-                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-cyan-400 rounded-2xl hover:bg-cyan-50 transition-all active:scale-95 shadow-md"
+                    className="flex flex-col items-center gap-2 p-4 bg-white border-2 border-[#c9424a]/60 rounded-2xl hover:bg-[#c9424a]/5 transition-all active:scale-95 shadow-md"
                   >
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center shadow-lg">
                       <Download className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-sm font-bold text-blue-900">Download</span>
+                    <span className="text-sm font-bold text-[#4a181b]">Download</span>
                   </button>
                 </div>
               </div>
@@ -643,27 +643,27 @@ export default function CreatePage() {
           <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-blue-950 flex items-center gap-2">
-                  <Edit className="h-6 w-6 text-blue-600" />
+                <h3 className="text-2xl font-bold text-[#2d0f11] flex items-center gap-2">
+                  <Edit className="h-6 w-6 text-[#c9424a]" />
                   Edit & Regenerate
                 </h3>
                 <button
                   onClick={() => setShowEditForm(false)}
-                  className="p-2 hover:bg-blue-50 rounded-full transition-colors"
+                  className="p-2 hover:bg-[#c9424a]/5 rounded-full transition-colors"
                 >
-                  <X className="h-5 w-5 text-blue-600" />
+                  <X className="h-5 w-5 text-[#c9424a]" />
                 </button>
               </div>
 
               {/* Current Image Preview */}
-              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-blue-200">
+              <div className="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-[#c9424a]/30">
                 <img src={imageSrc} alt="Current" className="w-full h-full object-cover" />
               </div>
 
               {/* Edit Prompts */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-bold text-blue-900">Select Style</Label>
+                  <Label className="text-sm font-bold text-[#4a181b]">Select Style</Label>
                   <div className="relative">
                     <select
                       value={topic}
@@ -671,7 +671,7 @@ export default function CreatePage() {
                         setTopic(e.target.value)
                         setManualPrompt("")
                       }}
-                      className="w-full h-12 text-sm font-medium border-2 border-blue-200 focus:border-blue-600 rounded-xl px-3 pr-10 bg-white appearance-none"
+                      className="w-full h-12 text-sm font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl px-3 pr-10 bg-white appearance-none"
                     >
                       <option value="">-- Select --</option>
                       {allPrompts.map((category) => (
@@ -682,12 +682,12 @@ export default function CreatePage() {
                         </optgroup>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#e06b72] pointer-events-none" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-bold text-blue-900">Or Write Custom Prompt</Label>
+                  <Label className="text-sm font-bold text-[#4a181b]">Or Write Custom Prompt</Label>
                   <textarea
                     value={manualPrompt}
                     onChange={(e) => {
@@ -695,7 +695,7 @@ export default function CreatePage() {
                       if (e.target.value.trim()) setTopic("")
                     }}
                     placeholder="अपना prompt लिखें..."
-                    className="w-full min-h-20 resize-none text-sm border-2 border-blue-200 focus:border-blue-600 rounded-xl p-3"
+                    className="w-full min-h-20 resize-none text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-3"
                   />
                 </div>
               </div>
@@ -703,7 +703,7 @@ export default function CreatePage() {
               {/* Caption & Tags */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-caption" className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                  <Label htmlFor="edit-caption" className="text-sm font-bold text-[#4a181b] flex items-center gap-2">
                     <span className="text-lg">💬</span> Caption (Optional)
                   </Label>
                   <textarea
@@ -711,12 +711,12 @@ export default function CreatePage() {
                     value={caption}
                     onChange={(e) => setCaption(e.target.value)}
                     placeholder="Write something..."
-                    className="w-full min-h-20 resize-none text-sm border-2 border-blue-200 focus:border-blue-600 rounded-xl p-3 transition-all"
+                    className="w-full min-h-20 resize-none text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-3 transition-all"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-tags" className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                  <Label htmlFor="edit-tags" className="text-sm font-bold text-[#4a181b] flex items-center gap-2">
                     <span className="text-lg">#️⃣</span> Tags (Optional)
                   </Label>
                   <Input
@@ -724,7 +724,7 @@ export default function CreatePage() {
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="#art, #ai, #fashion"
-                    className="h-12 text-sm border-2 border-blue-200 focus:border-blue-600 rounded-xl px-4"
+                    className="h-12 text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl px-4"
                   />
                 </div>
               </div>
@@ -734,14 +734,14 @@ export default function CreatePage() {
                 <Button
                   onClick={() => setShowEditForm(false)}
                   variant="outline"
-                  className="h-14 text-base font-bold border-2 border-blue-200 hover:bg-blue-50 rounded-xl"
+                  className="h-14 text-base font-bold border-2 border-[#c9424a]/30 hover:bg-[#c9424a]/5 rounded-xl"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleGenerate}
                   disabled={isGenerating || (!topic && !manualPrompt.trim())}
-                  className="h-14 gap-2 text-base font-bold bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 transition-all shadow-lg rounded-xl"
+                  className="h-14 gap-2 text-base font-bold bg-gradient-to-r from-[#a0353b] to-[#7d292e] hover:from-[#7d292e] hover:to-[#4a181b] transition-all shadow-lg rounded-xl"
                 >
                   {isGenerating ? (
                     <>
@@ -761,7 +761,7 @@ export default function CreatePage() {
               <Button 
                 onClick={handlePost} 
                 disabled={isPosting} 
-                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg hover:scale-105 rounded-xl"
+                className="w-full h-14 gap-3 text-lg font-bold bg-gradient-to-r from-[#c9424a] to-[#e06b72] hover:from-[#a0353b] hover:to-[#c9424a] transition-all shadow-lg hover:scale-105 rounded-xl"
               >
                 {isPosting ? (
                   <>

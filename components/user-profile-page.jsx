@@ -98,7 +98,7 @@ export default function UserProfilePage({ userId }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#c9424a]" />
       </div>
     )
   }
@@ -179,11 +179,11 @@ export default function UserProfilePage({ userId }) {
 
       {/* Cover & Avatar */}
       <div className="relative">
-        <div className="h-32 bg-gradient-to-r from-blue-600/30 to-blue-400/30" />
+        <div className="h-32 bg-gradient-to-r from-[#c9424a]/30 to-[#e06b72]/30" />
         <div className="absolute -bottom-12 left-4">
           <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
             <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-            <AvatarFallback className="text-2xl bg-blue-600/10 text-blue-600">
+            <AvatarFallback className="text-2xl bg-[#c9424a]/10 text-[#c9424a]">
               {user.name?.charAt(0)?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -305,7 +305,7 @@ export default function UserProfilePage({ userId }) {
                   {reel.thumbnail ? (
                     <img src={reel.thumbnail || "/placeholder.svg"} alt="Reel" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center">
                       <Film className="h-8 w-8 text-white" />
                     </div>
                   )}
