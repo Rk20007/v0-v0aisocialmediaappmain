@@ -60,6 +60,7 @@
     "next": "^16.0.8",
     "next-themes": "^0.4.6",
     "openai": "latest",
+    "razorpay": "^2.9.6",
     "react": "19.2.0",
     "react-day-picker": "9.8.0",
     "react-dom": "19.2.0",

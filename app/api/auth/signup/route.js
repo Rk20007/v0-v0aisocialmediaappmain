@@ -26,15 +26,12 @@ export async function POST(request) {
       await users.createIndex({ email: 1 }, { unique: true, sparse: true })
       await users.createIndex({ mobile: 1 }, { unique: true, sparse: true })
     } catch (indexError) {
-      // Index might already exist, continue
       console.log("[v0] Index creation info:", indexError.message)
     }
 
     if (email) {
       const normalizedEmail = email.toLowerCase().trim()
-      const emailExists = await users.findOne({
-        email: normalizedEmail,
-      })
+      const emailExists = await users.findOne({ email: normalizedEmail })
 
       if (emailExists) {
         return NextResponse.json(
@@ -72,6 +69,16 @@ export async function POST(request) {
       friends: [],
       friendRequests: [],
       sentRequests: [],
+      coins: 3,
+      coinHistory: [
+        {
+          type: "bonus",
+          coins: 3,
+          amount: 0,
+          description: "Welcome bonus",
+          date: new Date(),
+        }
+      ],
       createdAt: new Date(),
       updatedAt: new Date(),
       profileComplete: false,

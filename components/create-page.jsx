@@ -1,14 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import useSWR from "swr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import { Sparkles, Loader2, X, Send, Image, Plus, Camera, FolderOpen, Download, Edit, Share2, ChevronDown, Maximize2 } from "lucide-react"
+import { Sparkles, Loader2, X, Send, Image, Plus, Camera, FolderOpen, Download, Edit, Share2, ChevronDown, Maximize2, Mic, MicOff, RotateCcw, Camera as CameraIcon, Zap } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+
+const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
+
+const COIN_COST_PER_IMAGE = 20
 
 export default function CreatePage() {
   const router = useRouter()
@@ -26,6 +31,21 @@ export default function CreatePage() {
   const [showEditForm, setShowEditForm] = useState(false)
   const [showPostForm, setShowPostForm] = useState(false)
   const [showFullView, setShowFullView] = useState(false)
+  
+  // Voice recognition state
+  const [isListening, setIsListening] = useState(false)
+  const [isCameraOpen, setIsCameraOpen] = useState(false)
+  
+  const videoRef = useRef(null)
+  const streamRef = useRef(null)
+  const recognitionRef = useRef(null)
+
+  // Fetch wallet/coin data (for checking balance only)
+  const { data: walletData, mutate: mutateWallet } = useSWR("/api/wallet", fetcher, {
+    revalidateOnFocus: false,
+  })
+
+  const coins = walletData?.coins || 0
 
   // Load saved data from memory on mount
   useEffect(() => {
@@ -36,6 +56,16 @@ export default function CreatePage() {
     if (savedImage) setImageSrc(savedImage)
     if (savedCaption) setCaption(savedCaption)
     if (savedTags) setTags(savedTags)
+    
+    return () => {
+      // Cleanup camera stream on unmount
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
   }, [])
 
   // Save to memory whenever image changes
@@ -52,6 +82,112 @@ export default function CreatePage() {
   useEffect(() => {
     if (tags) sessionStorage.setItem('imageTags', tags)
   }, [tags])
+
+  // Voice recognition functions
+  const startVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast({
+        title: "Voice Not Supported",
+        description: "Your browser doesn't support voice input. Please type manually.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    recognitionRef.current = new SpeechRecognition()
+    recognitionRef.current.continuous = false
+    recognitionRef.current.interimResults = true
+    recognitionRef.current.lang = 'en-IN'
+
+    recognitionRef.current.onstart = () => {
+      setIsListening(true)
+      toast({
+        title: "🎤 Listening...",
+        description: "Speak your prompt now",
+      })
+    }
+
+    recognitionRef.current.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('')
+      
+      setManualPrompt(prev => prev + ' ' + transcript)
+      setTopic("")
+    }
+
+    recognitionRef.current.onerror = (event) => {
+      if (event.error !== "no-speech") {
+        console.error("Voice recognition error:", event.error)
+        toast({
+          title: "Voice Error",
+          description: "Could not recognize speech. Please try again.",
+          variant: "destructive",
+        })
+      }
+      setIsListening(false)
+    }
+
+    recognitionRef.current.onend = () => {
+      setIsListening(false)
+    }
+
+    recognitionRef.current.start()
+  }
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    }
+  }
+
+  // Camera functions
+  const openCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' } 
+      })
+      streamRef.current = stream
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+      setIsCameraOpen(true)
+    } catch (error) {
+      console.error("Camera error:", error)
+      toast({
+        title: "Camera Error",
+        description: "Could not access camera. Please check permissions.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const closeCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    setIsCameraOpen(false)
+  }
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas')
+      canvas.width = videoRef.current.videoWidth
+      canvas.height = videoRef.current.videoHeight
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(videoRef.current, 0, 0)
+      const dataUrl = canvas.toDataURL('image/jpeg')
+      setCharacterImage(dataUrl)
+      closeCamera()
+      toast({
+        title: "✓ Photo Captured!",
+        description: "Face picture ready for AI generation",
+      })
+    }
+  }
 
   // Combined prompts for single dropdown
   const allPrompts = [
@@ -112,6 +248,16 @@ export default function CreatePage() {
       return
     }
 
+    // Check if user has enough coins
+    if (coins < COIN_COST_PER_IMAGE) {
+      toast({
+        title: "Insufficient Coins",
+        description: `You need ${COIN_COST_PER_IMAGE} coins. You have ${coins} coins. Recharge from header.`,
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsGenerating(true)
     setShowEditForm(false)
     setShowPostForm(false)
@@ -132,9 +278,23 @@ export default function CreatePage() {
 
       if (data.success && data.data?.url) {
         setImageSrc(data.data.url)
+        
+        // Deduct coins after successful generation
+        const deductRes = await fetch("/api/wallet/deduct", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ coins: COIN_COST_PER_IMAGE }),
+          credentials: "include",
+        })
+        
+        const deductData = await deductRes.json()
+        if (deductData.success) {
+          mutateWallet()
+        }
+        
         toast({
           title: "✨ Image Generated!",
-          description: "आपकी AI creation तैयार है",
+          description: `आपकी AI creation तैयार है (-${COIN_COST_PER_IMAGE} coins)`,
         })
       } else {
         toast({
@@ -188,7 +348,6 @@ export default function CreatePage() {
           title: "🎉 Posted!",
           description: "आपकी creation अब live है",
         })
-        // Clear saved data after successful post
         sessionStorage.removeItem('generatedImage')
         sessionStorage.removeItem('imageCaption')
         sessionStorage.removeItem('imageTags')
@@ -257,11 +416,8 @@ export default function CreatePage() {
     if (!imageSrc) return
     
     try {
-      // Fetch the image as blob
       const response = await fetch(imageSrc)
       const blob = await response.blob()
-      
-      // Create download link
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -276,7 +432,6 @@ export default function CreatePage() {
         description: "Image saved successfully",
       })
     } catch (error) {
-      // Fallback: Try opening in new tab if fetch fails (e.g. CORS)
       const link = document.createElement('a')
       link.href = imageSrc
       link.target = "_blank"
@@ -338,6 +493,52 @@ export default function CreatePage() {
         <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-[#c9424a] rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
+      {/* Camera Modal */}
+      <Dialog open={isCameraOpen} onOpenChange={(open) => !open && closeCamera()}>
+        <DialogContent className="max-w-md w-full p-0 overflow-hidden bg-black border-none focus:outline-none">
+          <DialogTitle className="sr-only">Take Photo</DialogTitle>
+          <div className="relative">
+            <video 
+              ref={videoRef} 
+              autoPlay 
+              playsInline 
+              className="w-full h-auto rounded-lg"
+            />
+            {/* Selfie text overlay */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full">
+              <p className="text-white font-semibold text-sm">Selfie</p>
+            </div>
+            {/* Camera controls */}
+            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+              <button
+                onClick={closeCamera}
+                className="p-3 bg-white/20 rounded-full hover:bg-white/40 transition-colors"
+              >
+                <X className="h-6 w-6 text-white" />
+              </button>
+              <button
+                onClick={capturePhoto}
+                className="p-4 bg-white rounded-full hover:bg-gray-200 transition-colors border-4 border-[#c9424a]"
+              >
+                <Camera className="h-8 w-8 text-[#c9424a]" />
+              </button>
+              <button
+                onClick={() => {
+                  if (videoRef.current && videoRef.current.srcObject) {
+                    const tracks = videoRef.current.srcObject.getTracks()
+                    tracks.forEach(track => track.stop())
+                    openCamera()
+                  }
+                }}
+                className="p-3 bg-white/20 rounded-full hover:bg-white/40 transition-colors"
+              >
+                <RotateCcw className="h-6 w-6 text-white" />
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Generating Popup Modal */}
       {isGenerating && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center animate-fade-in">
@@ -373,6 +574,17 @@ export default function CreatePage() {
         {!imageSrc && (
         <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl mt-8">
           <CardContent className="p-6 space-y-6">
+            {/* Cost per image info */}
+            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-yellow-600" />
+                  <span className="text-sm font-medium text-yellow-800">Cost per image</span>
+                </div>
+                <span className="text-lg font-bold text-[#c9424a]">{COIN_COST_PER_IMAGE} coins</span>
+              </div>
+            </div>
+
             {/* Character Image Upload */}
             <div className="space-y-4">
               <Label className="text-lg font-bold flex items-center gap-2 text-[#2d0f11]">
@@ -404,11 +616,11 @@ export default function CreatePage() {
                     </button>
                     
                     <button
-                      onClick={() => document.getElementById("gallery-input")?.click()} // Reusing gallery input for simplicity as per original
+                      onClick={openCamera}
                       className="flex flex-col items-center gap-2 p-4 border-2 border-[#c9424a]/60 rounded-2xl bg-gradient-to-br from-[#c9424a]/5 to-[#c9424a]/10 hover:from-[#c9424a]/10 hover:to-[#c9424a]/20 transition-all active:scale-95 shadow-md"
                     >
                       <div className="w-12 h-12 rounded-full bg-[#c9424a] flex items-center justify-center shadow-lg">
-                        <Camera className="h-6 w-6 text-white" />
+                        <CameraIcon className="h-6 w-6 text-white" />
                       </div>
                       <span className="text-sm font-bold text-[#4a181b]">Selfie</span>
                     </button>
@@ -442,10 +654,10 @@ export default function CreatePage() {
                     </button>
                     
                     <button
-                      onClick={() => document.getElementById("gallery-input")?.click()}
+                      onClick={openCamera}
                       className="flex items-center justify-center gap-2 p-3 border-2 border-[#c9424a]/60 rounded-xl bg-white hover:bg-[#c9424a]/5 transition-all text-sm font-semibold text-[#4a181b] shadow-sm"
                     >
-                      <Camera className="h-4 w-4 text-[#c9424a]" />
+                      <CameraIcon className="h-4 w-4 text-[#c9424a]" />
                       Retake
                     </button>
                   </div>
@@ -550,26 +762,55 @@ export default function CreatePage() {
               </div>
             </div>
 
-            {/* Manual Prompt Input */}
+            {/* Write Your Own Prompt - Enhanced with Voice Input */}
             <div className="space-y-3">
               <Label htmlFor="manual-prompt" className="text-lg font-bold flex items-center gap-2 text-[#2d0f11]">
                 <div className="w-8 h-8 bg-gradient-to-br from-[#c9424a] to-[#e06b72] rounded-lg flex items-center justify-center shadow-md">
                   <Edit className="h-5 w-5 text-white" />
                 </div>
-                Or Write Your Own Prompt
+                Write Your Own Prompt
               </Label>
-              <textarea
-                id="manual-prompt"
-                value={manualPrompt}
-                onChange={(e) => {
-                  setManualPrompt(e.target.value)
-                  if (e.target.value.trim()) setTopic("")
-                }}
-                placeholder="अपना खुद का prompt लिखें... (e.g., नीली साड़ी में खूबसूरत लड़की)"
-                className="w-full min-h-24 resize-none text-base font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-4 transition-all shadow-sm"
-              />
+              
+              <div className="relative">
+                <textarea
+                  id="manual-prompt"
+                  value={manualPrompt}
+                  onChange={(e) => {
+                    setManualPrompt(e.target.value)
+                    if (e.target.value.trim()) setTopic("")
+                  }}
+                  placeholder="अपना खुद का prompt लिखें... (e.g., नीली साड़ी में खूबसूरत लड़की)"
+                  className="w-full min-h-28 resize-none text-base font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-4 pr-14 transition-all shadow-sm"
+                />
+                
+                {/* Voice Input Button */}
+                <button
+                  type="button"
+                  onClick={isListening ? stopVoiceInput : startVoiceInput}
+                  className={`absolute bottom-3 right-3 p-2.5 rounded-full transition-all ${
+                    isListening 
+                      ? "bg-red-500 animate-pulse" 
+                      : "bg-[#c9424a] hover:bg-[#a0353b]"
+                  }`}
+                >
+                  {isListening ? (
+                    <MicOff className="h-5 w-5 text-white" />
+                  ) : (
+                    <Mic className="h-5 w-5 text-white" />
+                  )}
+                </button>
+              </div>
+              
+              {/* Voice status indicator */}
+              {isListening && (
+                <div className="flex items-center gap-2 text-sm text-[#c9424a] font-medium animate-pulse">
+                  <span className="w-2 h-2 bg-[#c9424a] rounded-full animate-ping"></span>
+                  Listening... Speak now
+                </div>
+              )}
+              
               <p className="text-xs text-[#c9424a] italic">
-                💡 Tip: Be descriptive for better results
+                💡 Tip: Click the mic button and speak, or type your prompt
               </p>
             </div>
 
@@ -587,7 +828,7 @@ export default function CreatePage() {
               ) : (
                 <>
                   <Sparkles className="h-6 w-6" />
-                  Generate AI Image
+                  Generate AI Image ({COIN_COST_PER_IMAGE} coins)
                 </>
               )}
             </Button>
@@ -754,7 +995,7 @@ export default function CreatePage() {
           <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-lg animate-scale-in rounded-3xl">
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-[#2d0f11] flex items-center gap-2">
+              <h3 className="text-2xl font-bold text-[#2d0f11] flex items-center gap-2">
                   <Edit className="h-6 w-6 text-[#c9424a]" />
                   Edit Prompt
                 </h3>
@@ -799,15 +1040,32 @@ export default function CreatePage() {
 
                 <div className="space-y-2">
                   <Label className="text-sm font-bold text-[#4a181b]">Or Write Custom Prompt</Label>
-                  <textarea
-                    value={manualPrompt}
-                    onChange={(e) => {
-                      setManualPrompt(e.target.value)
-                      if (e.target.value.trim()) setTopic("")
-                    }}
-                    placeholder="अपना prompt लिखें..."
-                    className="w-full min-h-20 resize-none text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-3"
-                  />
+                  <div className="relative">
+                    <textarea
+                      value={manualPrompt}
+                      onChange={(e) => {
+                        setManualPrompt(e.target.value)
+                        if (e.target.value.trim()) setTopic("")
+                      }}
+                      placeholder="अपना prompt लिखें... (Speak or type)"
+                      className="w-full min-h-20 resize-none text-sm border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-3 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={isListening ? stopVoiceInput : startVoiceInput}
+                      className={`absolute bottom-3 right-3 p-2 rounded-full transition-all ${
+                        isListening 
+                          ? "bg-red-500 animate-pulse" 
+                          : "bg-[#c9424a] hover:bg-[#a0353b]"
+                      }`}
+                    >
+                      {isListening ? (
+                        <MicOff className="h-4 w-4 text-white" />
+                      ) : (
+                        <Mic className="h-4 w-4 text-white" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -833,7 +1091,7 @@ export default function CreatePage() {
                   ) : (
                     <>
                       <Sparkles className="h-5 w-5" />
-                      Regenerate
+                      Regenerate ({COIN_COST_PER_IMAGE} coins)
                     </>
                   )}
                 </Button>

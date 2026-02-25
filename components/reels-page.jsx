@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import useSWR from "swr"
+import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -34,6 +35,8 @@ const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => re
 export default function ReelsPage() {
   const { user } = useAuth()
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const initialReelId = searchParams.get("id")
   const { data, isLoading, mutate } = useSWR("/api/reels", fetcher, {
     revalidateOnFocus: false,
   })
@@ -50,6 +53,15 @@ export default function ReelsPage() {
   const lastYRef = useRef(0)
 
   const reels = data?.reels || []
+
+  useEffect(() => {
+    if (initialReelId && reels.length > 0) {
+      const index = reels.findIndex((r) => r._id === initialReelId)
+      if (index >= 0) {
+        setCurrentIndex(index)
+      }
+    }
+  }, [initialReelId, reels.length])
 
   const handleTouchStart = (e) => {
     lastYRef.current = e.touches[0].clientY

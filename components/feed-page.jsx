@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import useSWR from "swr"
 import { useAuth } from "@/components/auth-provider"
 import PostCard from "@/components/post-card"
+import ReelPostCard from "@/components/reel-post-card"
 import StoriesBar from "@/components/stories-bar"
 import { Loader2, RefreshCw, Film, ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -44,6 +45,12 @@ export default function FeedPage() {
 
   const posts = data?.posts || []
   const reels = reelsData?.reels || []
+
+  // Combine posts and reels for feed - like Facebook
+  const feedItems = [
+    ...posts.map(post => ({ ...post, type: 'post' })),
+    ...reels.map(reel => ({ ...reel, type: 'reel', _id: `reel-${reel._id}` }))
+  ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   return (
     <div className="space-y-4">
@@ -90,7 +97,7 @@ export default function FeedPage() {
               </Link>
 
               {reels.slice(0, 10).map((reel) => (
-                <Link key={reel._id} href="/reels">
+                <Link key={reel._id} href={`/reels?id=${reel._id}`}>
                   <div className="flex-shrink-0 w-24 h-40 rounded-xl overflow-hidden relative cursor-pointer hover:scale-105 transition-transform">
                     {reel.thumbnail ? (
                       <img
@@ -131,7 +138,7 @@ export default function FeedPage() {
           </div>
         </Link>
 
-        {posts.length === 0 ? (
+        {feedItems.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">No posts yet</p>
             <Link href="/create">
@@ -140,8 +147,12 @@ export default function FeedPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {posts.map((post) => (
-              <PostCard key={post._id} post={post} currentUserId={user?._id} onUpdate={() => mutate()} />
+            {feedItems.map((item) => (
+              item.type === 'reel' ? (
+                <ReelPostCard key={item._id} reel={item} currentUserId={user?._id} />
+              ) : (
+                <PostCard key={item._id} post={item} currentUserId={user?._id} onUpdate={() => mutate()} />
+              )
             ))}
           </div>
         )}

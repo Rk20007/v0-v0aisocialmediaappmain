@@ -55,7 +55,7 @@ export async function POST(req) {
 
     // Send to n8n webhook
     const response = await fetch(
-      "https://n8n.limbutech.in/webhook/ef9049a4-dd5a-49ac-91a4-cd732379460e",
+      "https://n8n.srv1387094.hstgr.cloud/webhook/colorcode-image-modal",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

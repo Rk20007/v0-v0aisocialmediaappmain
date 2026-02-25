@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
-export default function PostCard({ post, currentUserId, onUpdate }) {
+
+export default function PostCard({ post, currentUserId, onUpdate, reels }) {
   const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUserId))
   const [likesCount, setLikesCount] = useState(post.likes?.length || 0)
   const [showComments, setShowComments] = useState(false)
@@ -19,6 +20,11 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [showFullView, setShowFullView] = useState(false)
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const videoRef = useRef(null)
+  
+  // Get first reel for display in post card
+  const firstReel = reels && reels.length > 0 ? reels[0] : null
 
   const handleLike = async () => {
     setIsLiked(!isLiked)
@@ -84,11 +90,24 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
           text: post.caption || 'Check out this post on Colorcode',
           url: window.location.href
         })
-      } catch (err) {
+      } catch (err) { 
         // Share cancelled
       }
     }
   }
+
+  // Handle video play/pause
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause()
+      } else {
+        videoRef.current.play()
+      }
+      setIsVideoPlaying(!isVideoPlaying)
+    }
+  }
+  
 
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
 
@@ -132,7 +151,7 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
                   setShowMenu(false)
                 }} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
                   <Maximize2 className="h-4 w-4 text-muted-foreground" />
-                  Full View
+                  Delete
                 </button>
               </div>
             </>
@@ -143,6 +162,31 @@ export default function PostCard({ post, currentUserId, onUpdate }) {
       <CardContent className="px-4 pb-2">
         {post.caption && <p className="text-sm mb-3 whitespace-pre-wrap">{post.caption}</p>}
 
+        {/* Show Reel Video if available - autoplay like FB/Insta */}
+        {firstReel && firstReel.videoUrl && (
+          <div className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
+            <video
+              ref={videoRef}
+              src={firstReel.videoUrl}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              poster={firstReel.thumbnail}
+              playsInline
+              autoPlay
+              loop
+              muted
+              onClick={toggleVideo}
+            />
+            {/* Reel indicator badge */}
+            <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 rounded-full flex items-center gap-1">
+              <svg className="h-3 w-3 text-white fill-current" viewBox="0 0 24 24">
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+              <span className="text-white text-xs font-medium">Reel</span>
+            </div>
+          </div>
+        )}
+
+        {/* Show Image if available */}
         {post.imageUrl && (
           <Dialog open={showFullView} onOpenChange={setShowFullView}>
             
