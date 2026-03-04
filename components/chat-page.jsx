@@ -4,11 +4,8 @@ import { useState, useEffect, useRef } from "react"
 import useSWR from "swr"
 import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Send, Loader2, MoreVertical } from "lucide-react"
+import { ArrowLeft, Send, Loader2, Phone, Video, Info, Camera, Mic, Heart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 
@@ -25,23 +22,13 @@ export default function ChatPage({ friendId }) {
   const { data: messagesData, mutate } = useSWR(
     friendId && user?._id ? `/api/messages?friendId=${friendId}&cache=${user._id}` : null,
     fetcher,
-    {
-      refreshInterval: 3000, // Poll every 3 seconds
-      revalidateOnFocus: true,
-      dedupingInterval: 1000, // Prevent duplicate requests within 1 second
-    },
+    { refreshInterval: 3000, revalidateOnFocus: true, dedupingInterval: 1000 },
   )
 
   const { data: friendData } = useSWR(friendId ? `/api/users/${friendId}` : null, fetcher)
 
   const messages = messagesData?.messages || []
   const friend = friendData?.user
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      console.log("[v0] Chat messages loaded:", messages.length, "messages")
-    }
-  }, [messages.length])
 
   useEffect(() => {
     if (shouldAutoScroll) {
@@ -73,13 +60,7 @@ export default function ChatPage({ friendId }) {
       sending: true,
     }
 
-    mutate(
-      {
-        ...messagesData,
-        messages: [...messages, tempMessage],
-      },
-      false,
-    )
+    mutate({ ...messagesData, messages: [...messages, tempMessage] }, false)
 
     try {
       const res = await fetch("/api/messages", {
@@ -88,18 +69,10 @@ export default function ChatPage({ friendId }) {
         body: JSON.stringify({ receiverId: friendId, content }),
         credentials: "include",
       })
-
       const data = await res.json()
-
-      if (!data.success) {
-        throw new Error(data.error || "Failed to send message")
-      }
-
-      console.log("[v0] Message sent successfully")
-
+      if (!data.success) throw new Error(data.error || "Failed to send message")
       await mutate()
-    } catch (error) {
-      console.error("[v0] Failed to send message:", error)
+    } catch {
       setMessage(content)
       mutate()
     } finally {
@@ -109,143 +82,170 @@ export default function ChatPage({ friendId }) {
 
   const groupedMessages = messages.reduce((groups, msg) => {
     const date = new Date(msg.createdAt).toLocaleDateString()
-    if (!groups[date]) {
-      groups[date] = []
-    }
+    if (!groups[date]) groups[date] = []
     groups[date].push(msg)
     return groups
   }, {})
 
+  /* ── Loading skeleton ── */
   if (!friend) {
     return (
-      <div className="flex flex-col h-[calc(100vh-8rem)]">
-        <div className="flex items-center gap-3 p-4 border-b border-border bg-card shadow-sm mb-4">
+      <div className="flex flex-col h-[calc(100dvh-7.5rem)] bg-white dark:bg-black">
+        <div className="flex items-center gap-2 px-2 py-2 border-b border-gray-200 dark:border-zinc-800">
           <Link href="/messages">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 active:opacity-70">
+              <ArrowLeft className="h-5 w-5 text-black dark:text-white" />
+            </button>
           </Link>
-          <div className="flex-1">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
+          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] bg-slate-50 dark:bg-black">
-      {/* Header */}
-      <div className="flex items-center gap-3 p-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+    <div className="flex flex-col h-[calc(100dvh-7.5rem)] bg-white dark:bg-black">
+
+      {/* ── Instagram-style Header ── */}
+      <div className="flex items-center gap-1 px-1 py-2 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-black">
+        {/* Back */}
         <Link href="/messages">
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 active:opacity-70 shrink-0">
+            <ArrowLeft className="h-5 w-5 text-black dark:text-white" />
+          </button>
         </Link>
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
-          <AvatarFallback>{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className="font-semibold">{friend?.name || "Loading..."}</p>
-          <div className="flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-green-500" />
-            <p className="text-xs text-muted-foreground">Online</p>
+
+        {/* Avatar + name */}
+        <Link href={`/user/${friendId}`} className="flex items-center gap-2.5 flex-1 min-w-0 active:opacity-70">
+          <div className="relative shrink-0">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
+              <AvatarFallback className="text-sm font-bold">
+                {friend?.name?.charAt(0)?.toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute bottom-0 right-0 h-[10px] w-[10px] rounded-full bg-green-500 border-2 border-white dark:border-black" />
           </div>
+          <div className="min-w-0">
+            <p className="font-bold text-[15px] text-black dark:text-white leading-tight truncate">
+              {friend?.name}
+            </p>
+            <p className="text-[11px] text-green-500 font-medium">Active now</p>
+          </div>
+        </Link>
+
+        {/* Action icons */}
+        <div className="flex items-center shrink-0">
+          <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 active:opacity-70">
+            <Phone className="h-[22px] w-[22px] text-black dark:text-white" />
+          </button>
+          <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 active:opacity-70">
+            <Video className="h-[22px] w-[22px] text-black dark:text-white" />
+          </button>
+          <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 active:opacity-70">
+            <Info className="h-[22px] w-[22px] text-black dark:text-white" />
+          </button>
         </div>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <MoreVertical className="h-5 w-5" />
-        </Button>
       </div>
 
-      {/* Messages */}
+      {/* ── Messages area ── */}
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-6 hide-scrollbar"
+        className="flex-1 overflow-y-auto px-3 py-3 bg-white dark:bg-black"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {messages.length === 0 ? (
+          /* Empty state */
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#c9424a]/10 dark:bg-[#c9424a]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Avatar className="h-12 w-12">
+              <div className="h-20 w-20 rounded-full mx-auto mb-4 overflow-hidden ring-2 ring-[#c9424a]/20">
+                <Avatar className="h-full w-full">
                   <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
-                  <AvatarFallback>{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="text-2xl font-bold">
+                    {friend?.name?.charAt(0)?.toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
               </div>
-              <p className="font-semibold text-lg mb-1">{friend?.name}</p>
-              <p className="text-sm text-muted-foreground">Start chatting with {friend?.name}</p>
+              <p className="font-bold text-[17px] text-black dark:text-white mb-1">{friend?.name}</p>
+              <p className="text-[13px] text-gray-500 dark:text-gray-400">
+                Say hi to start a conversation!
+              </p>
             </div>
           </div>
         ) : (
           Object.entries(groupedMessages).map(([date, msgs]) => (
             <div key={date}>
-              {/* Date Divider */}
-              <div className="relative flex items-center justify-center py-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border/40" />
-                </div>
-                <div className="relative flex justify-center text-xs font-medium uppercase tracking-wider">
-                  <span className="bg-slate-50 dark:bg-black px-3 text-muted-foreground/60">
-                    {new Date(date).toDateString() === new Date().toDateString()
-                      ? "Today"
-                      : new Date(date).toDateString() === new Date(Date.now() - 86400000).toDateString()
-                        ? "Yesterday"
-                        : date}
-                  </span>
-                </div>
+              {/* Date divider */}
+              <div className="flex items-center justify-center py-4">
+                <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                  {new Date(date).toDateString() === new Date().toDateString()
+                    ? "Today"
+                    : new Date(date).toDateString() ===
+                        new Date(Date.now() - 86400000).toDateString()
+                      ? "Yesterday"
+                      : date}
+                </span>
               </div>
 
-              {/* Messages for this date */}
               {msgs.map((msg, index) => {
                 const isOwn = msg.senderId === user?._id
                 const nextMsg = msgs[index + 1]
                 const prevMsg = msgs[index - 1]
-                
-                const isLastInSequence = !nextMsg || nextMsg.senderId !== msg.senderId
-                const isFirstInSequence = !prevMsg || prevMsg.senderId !== msg.senderId
-                
-                const showAvatar = !isOwn && isLastInSequence
-                const showTime = isLastInSequence
+                const isLastInSeq = !nextMsg || nextMsg.senderId !== msg.senderId
+                const isFirstInSeq = !prevMsg || prevMsg.senderId !== msg.senderId
+                const showAvatar = !isOwn && isLastInSeq
+                const showTime = isLastInSeq
 
                 return (
-                  <div 
-                    key={msg._id} 
+                  <div
+                    key={msg._id}
                     className={cn(
-                      "flex gap-2", 
+                      "flex gap-2 items-end",
                       isOwn ? "justify-end" : "justify-start",
-                      isFirstInSequence ? "mt-4" : "mt-1"
+                      isFirstInSeq ? "mt-3" : "mt-[3px]",
                     )}
                   >
+                    {/* Friend avatar placeholder (keeps alignment) */}
                     {!isOwn && (
-                      <div className="w-8 flex-shrink-0 flex flex-col justify-end">
+                      <div className="w-7 shrink-0 flex flex-col justify-end mb-0.5">
                         {showAvatar && (
-                          <Avatar className="h-8 w-8">
+                          <Avatar className="h-7 w-7">
                             <AvatarImage src={friend?.avatar || "/placeholder.svg"} />
-                            <AvatarFallback className="text-xs">{friend?.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                            <AvatarFallback className="text-[10px] font-bold">
+                              {friend?.name?.charAt(0)?.toUpperCase()}
+                            </AvatarFallback>
                           </Avatar>
                         )}
                       </div>
                     )}
 
-                    <div className={cn("flex flex-col max-w-[75%] md:max-w-[60%]", isOwn ? "items-end" : "items-start")}>
+                    <div className={cn("flex flex-col max-w-[72%]", isOwn ? "items-end" : "items-start")}>
+                      {/* Bubble */}
                       <div
                         className={cn(
-                          "px-4 py-2 shadow-sm text-[15px] leading-relaxed break-words",
+                          "px-4 py-[10px] text-[15px] leading-relaxed break-words",
                           isOwn
-                            ? "bg-[#c9424a] text-white rounded-2xl rounded-tr-sm"
-                            : "bg-white dark:bg-zinc-800 text-foreground border border-border/40 rounded-2xl rounded-tl-sm",
-                          !isLastInSequence && isOwn && "rounded-br-sm",
-                          !isLastInSequence && !isOwn && "rounded-bl-sm",
+                            ? "bg-gradient-to-br from-[#c9424a] to-[#e06b72] text-white rounded-[22px] rounded-tr-[5px]"
+                            : "bg-gray-100 dark:bg-zinc-800 text-black dark:text-white rounded-[22px] rounded-tl-[5px]",
+                          !isLastInSeq && isOwn && "rounded-br-[5px]",
+                          !isLastInSeq && !isOwn && "rounded-bl-[5px]",
                           msg.sending && "opacity-60",
                         )}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                        <p className="text-[14px] whitespace-pre-wrap">{msg.content}</p>
                       </div>
+
+                      {/* Timestamp */}
                       {showTime && (
-                        <span className={cn("text-[10px] text-muted-foreground mt-1 px-1 select-none", isOwn ? "text-right" : "text-left")}>
+                        <span
+                          className={cn(
+                            "text-[10px] text-gray-400 dark:text-gray-500 mt-1 px-1",
+                            isOwn ? "text-right" : "text-left",
+                          )}
+                        >
                           {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
-                          {msg.sending && " • Sending..."}
+                          {msg.sending && " · Sending…"}
                         </span>
                       )}
                     </div>
@@ -258,22 +258,56 @@ export default function ChatPage({ friendId }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSend} className="p-3 border-t border-border bg-background">
-        <div className="flex gap-2 items-center max-w-4xl mx-auto">
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Message..."
-            className="flex-1 rounded-full bg-muted/50 border-transparent focus:border-[#c9424a] focus:bg-background transition-all h-11"
-            disabled={isSending}
-            autoFocus
-          />
-          <Button type="submit" disabled={!message.trim() || isSending} size="icon" className="h-11 w-11 rounded-full shrink-0 bg-[#c9424a] hover:bg-[#a0353b] shadow-md">
-            {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-          </Button>
-        </div>
-      </form>
+      {/* ── Instagram-style Input Bar ── */}
+      <div className="px-3 py-2 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-black">
+        <form onSubmit={handleSend}>
+          <div className="flex items-center gap-2">
+            {/* Camera icon */}
+            <button
+              type="button"
+              className="shrink-0 p-1 active:opacity-70"
+            >
+              <Camera className="h-[26px] w-[26px] text-[#c9424a]" />
+            </button>
+
+            {/* Pill input */}
+            <div className="flex-1 flex items-center bg-gray-100 dark:bg-zinc-800 rounded-full px-4 py-[9px] gap-2 min-w-0">
+              <input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Message…"
+                className="flex-1 bg-transparent text-[14px] text-black dark:text-white placeholder:text-gray-400 outline-none min-w-0"
+                disabled={isSending}
+              />
+              {/* Mic icon — shown when input is empty */}
+              {!message.trim() && (
+                <button type="button" className="shrink-0 active:opacity-70">
+                  <Mic className="h-5 w-5 text-[#c9424a]" />
+                </button>
+              )}
+            </div>
+
+            {/* Send / Heart */}
+            {message.trim() ? (
+              <button
+                type="submit"
+                disabled={isSending}
+                className="shrink-0 active:opacity-70"
+              >
+                {isSending ? (
+                  <Loader2 className="h-6 w-6 animate-spin text-[#c9424a]" />
+                ) : (
+                  <Send className="h-6 w-6 text-[#c9424a]" />
+                )}
+              </button>
+            ) : (
+              <button type="button" className="shrink-0 active:opacity-70">
+                <Heart className="h-[26px] w-[26px] text-[#c9424a]" />
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

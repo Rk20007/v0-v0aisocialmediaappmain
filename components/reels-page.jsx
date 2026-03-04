@@ -394,31 +394,21 @@ export default function ReelsPage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[calc(100vh-8rem)] bg-black overflow-hidden snap-y snap-mandatory"
+      className="relative h-[calc(100dvh-7.5rem)] bg-black overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Header Progress Indicators */}
-      <div className="absolute top-4 left-4 right-16 z-30 flex gap-1">
-        {reels.slice(0, 10).map((_, i) => (
-          <div
-            key={i}
-            className={cn(
-              "h-1 flex-1 rounded-full transition-all duration-300 backdrop-blur-sm",
-              i === currentIndex ? "bg-[#c9424a]" : "bg-white/20",
-            )}
-          />
-        ))}
-      </div> 
-
-      {/* Create Button */}
-      <Button
-        onClick={() => setShowUpload(true)}
-        size="icon"
-        className="absolute top-4 right-4 z-30 h-12 w-12 rounded-full bg-[#c9424a] hover:bg-[#a0353b] text-white shadow-lg"
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      {/* Top bar: "Reels" label + Create button */}
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2">
+        <span className="text-white text-xl font-bold drop-shadow-md tracking-tight">Reels</span>
+        <Button
+          onClick={() => setShowUpload(true)}
+          size="icon"
+          className="h-9 w-9 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 text-white border border-white/20"
+        >
+          <Plus className="h-5 w-5" />
+        </Button>
+      </div>
 
       {/* Video Container */}
       <div
@@ -443,18 +433,16 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [showHeart, setShowHeart] = useState(false)
+  const [showPause, setShowPause] = useState(false)
   const videoRef = useRef(null)
   const lastTapRef = useRef(0)
+  const pauseTimerRef = useRef(null)
 
   useEffect(() => {
     if (!videoRef.current) return
-
     if (isActive) {
       videoRef.current.currentTime = 0
-      videoRef.current
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false))
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
     } else {
       videoRef.current.pause()
       setIsPlaying(false)
@@ -463,10 +451,13 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
 
   const togglePlay = () => {
     if (!videoRef.current) return
-
     if (isPlaying) {
       videoRef.current.pause()
       setIsPlaying(false)
+      // Show pause icon briefly
+      setShowPause(true)
+      clearTimeout(pauseTimerRef.current)
+      pauseTimerRef.current = setTimeout(() => setShowPause(false), 800)
     } else {
       videoRef.current.play()
       setIsPlaying(true)
@@ -484,11 +475,12 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   const handleTap = (e) => {
     const now = Date.now()
     if (now - lastTapRef.current < 300) {
+      // Double tap → like
       if (!liked) {
         handleLike()
-        setShowHeart(true)
-        setTimeout(() => setShowHeart(false), 600)
       }
+      setShowHeart(true)
+      setTimeout(() => setShowHeart(false), 900)
     } else {
       togglePlay()
     }
@@ -498,13 +490,9 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   const handleLike = async () => {
     setLiked(!liked)
     setLikesCount((prev) => (liked ? prev - 1 : prev + 1))
-
     try {
-      await fetch(`/api/reels/${reel._id}/like`, {
-        method: "POST",
-        credentials: "include",
-      })
-    } catch (error) {
+      await fetch(`/api/reels/${reel._id}/like`, { method: "POST", credentials: "include" })
+    } catch {
       setLiked(liked)
       setLikesCount((prev) => (liked ? prev + 1 : prev - 1))
     }
@@ -513,29 +501,23 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   const handleShare = async () => {
     try {
       if (navigator.share) {
-        await navigator.share({
-          title: `Reel by ${reel.user?.name}`,
-          text: reel.caption || "Check out this reel!",
-          url: window.location.href,
-        })
+        await navigator.share({ title: `Reel by ${reel.user?.name}`, text: reel.caption || "Check out this reel!", url: window.location.href })
       } else {
         await navigator.clipboard.writeText(window.location.href)
-        toast({ title: "Link copied to clipboard!" })
+        toast({ title: "Link copied!" })
       }
-    } catch (error) {
-      // User cancelled share
-    }
+    } catch { /* cancelled */ }
   }
 
   return (
-    <div className="h-full relative bg-black group">
-      {/* Video */}
+    <div className="h-full relative bg-black select-none">
+      {/* ── Full-screen video ── */}
       <div className="absolute inset-0" onClick={handleTap}>
         {reel.videoUrl ? (
           <video
             ref={videoRef}
             src={reel.videoUrl}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             loop
             playsInline
             muted={isMuted}
@@ -548,89 +530,146 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
           </div>
         )}
 
-        {!isPlaying && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none backdrop-blur-sm">
-            <div className="p-4 rounded-full bg-white/20 backdrop-blur-md">
-              <Play className="h-16 w-16 text-white fill-white" />
+        {/* Pause icon flash */}
+        {showPause && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="p-5 rounded-full bg-black/40 backdrop-blur-sm animate-in fade-in zoom-in-75 duration-150">
+              <Play className="h-14 w-14 text-white fill-white" />
             </div>
           </div>
         )}
 
+        {/* Double-tap heart burst */}
         {showHeart && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <Heart className="h-28 w-28 text-[#c9424a] fill-[#c9424a] animate-ping" />
+            <Heart className="h-32 w-32 fill-white text-white drop-shadow-2xl animate-in zoom-in-50 duration-200" />
           </div>
         )}
       </div>
 
-      {/* Gradient Overlays */}
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+      {/* ── Top gradient ── */}
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
 
-      {/* Mute Button */}
+      {/* ── Bottom gradient ── */}
+      <div className="absolute inset-x-0 bottom-0 h-80 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+
+      {/* ── Mute / unmute (top-right, below progress bar area) ── */}
       <button
         onClick={toggleMute}
-        className="absolute top-20 right-4 z-20 p-3 rounded-full bg-black/50 backdrop-blur-md hover:bg-black/70 transition-all"
+        className="absolute top-16 right-4 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-sm active:scale-90 transition-transform"
       >
-        {isMuted ? <VolumeX className="h-6 w-6 text-white" /> : <Volume2 className="h-6 w-6 text-white" />}
+        {isMuted
+          ? <VolumeX className="h-5 w-5 text-white" />
+          : <Volume2 className="h-5 w-5 text-white" />}
       </button>
 
-      {/* User Info & Actions */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-4">
-        <div className="flex items-end justify-between">
-          {/* Left: User Info */}
-          <div className="flex items-center gap-3 flex-1">
-            <Avatar className="h-12 w-12 border-2 border-white/30">
-              <AvatarImage src={reel.user?.avatar || "/placeholder.svg"} alt={reel.user?.name} />
-              <AvatarFallback className="bg-[#c9424a]/30 text-white">{reel.user?.name?.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <Link href={`/profile/${reel.user?._id}`}>
-                <p className="font-bold text-white hover:text-[#e06b72] transition">{reel.user?.name}</p>
+      {/* ── Bottom overlay: user info + actions ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-8">
+        <div className="flex items-end gap-2">
+
+          {/* Left: user info + caption + music */}
+          <div className="flex-1 min-w-0 space-y-2.5 pr-2">
+            {/* Username row */}
+            <div className="flex items-center gap-2.5">
+              <Link href={`/user/${reel.userId}`}>
+                <Avatar className="h-9 w-9 ring-2 ring-white shadow-lg">
+                  <AvatarImage src={reel.user?.avatar || "/placeholder.svg"} alt={reel.user?.name} />
+                  <AvatarFallback className="bg-[#c9424a] text-white text-sm font-bold">
+                    {reel.user?.name?.charAt(0)?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </Link>
-              {reel.caption && <p className="text-white/70 text-sm line-clamp-2">{reel.caption}</p>}
+              <Link href={`/user/${reel.userId}`}>
+                <p className="font-bold text-white text-[15px] drop-shadow-md leading-tight">
+                  {reel.user?.name}
+                </p>
+              </Link>
+            </div>
+
+            {/* Caption */}
+            {reel.caption && (
+              <p className="text-white/90 text-[13px] leading-snug line-clamp-2 drop-shadow font-medium">
+                {reel.caption}
+              </p>
+            )}
+
+            {/* Music row */}
+            <div className="flex items-center gap-2">
+              <div
+                className="h-4 w-4 rounded-full bg-white/90 flex items-center justify-center shadow"
+                style={{ animation: isPlaying ? "spin 3s linear infinite" : "none" }}
+              >
+                <div className="h-1.5 w-1.5 rounded-full bg-black" />
+              </div>
+              <p className="text-white/80 text-[11px] font-medium truncate max-w-[150px]">
+                ♪ Original audio · {reel.user?.name}
+              </p>
             </div>
           </div>
 
-          {/* Right: Action Buttons */}
-          <div className="flex flex-col items-center gap-6 ml-4">
-            <button onClick={handleLike} className="flex flex-col items-center gap-2 group">
-              <div
+          {/* Right: action buttons — clean Instagram style */}
+          <div className="flex flex-col items-center gap-5 pb-2 shrink-0">
+            {/* Like */}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleLike() }}
+              className="flex flex-col items-center gap-[3px] active:scale-90 transition-transform"
+            >
+              <Heart
                 className={cn(
-                  "p-3 rounded-full transition-all duration-200",
-                  liked ? "bg-[#c9424a]/30 scale-110" : "bg-white/10 hover:bg-white/20",
+                  "h-8 w-8 drop-shadow-md transition-all duration-200",
+                  liked
+                    ? "fill-[#ff3b5c] text-[#ff3b5c] scale-110"
+                    : "text-white fill-transparent stroke-white stroke-[1.8]"
                 )}
-              >
-                <Heart className={cn("h-7 w-7 transition-all", liked ? "fill-[#c9424a] text-[#c9424a]" : "text-white")} />
-              </div>
-              <span className="text-white text-xs font-semibold">{likesCount}</span>
+              />
+              <span className="text-white text-[11px] font-bold drop-shadow">{likesCount}</span>
             </button>
 
-            <button className="flex flex-col items-center gap-2 group">
-              <div className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all">
-                <MessageCircle className="h-7 w-7 text-white" />
-              </div>
-              <span className="text-white text-xs font-semibold">{reel.comments?.length || 0}</span>
+            {/* Comment */}
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="flex flex-col items-center gap-[3px] active:scale-90 transition-transform"
+            >
+              <MessageCircle className="h-8 w-8 text-white fill-transparent stroke-white stroke-[1.8] drop-shadow-md" />
+              <span className="text-white text-[11px] font-bold drop-shadow">{reel.comments?.length || 0}</span>
             </button>
 
-            <button onClick={handleShare} className="flex flex-col items-center gap-2 group">
-              <div className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all">
-                <Share2 className="h-7 w-7 text-white" />
-              </div>
-              <span className="text-white text-xs font-semibold">Share</span>
+            {/* Share — icon only, no text */}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleShare() }}
+              className="flex flex-col items-center gap-[3px] active:scale-90 transition-transform"
+            >
+              <Share2 className="h-8 w-8 text-white fill-transparent stroke-white stroke-[1.8] drop-shadow-md" />
             </button>
 
-            <button onClick={() => setBookmarked(!bookmarked)} className="flex flex-col items-center gap-2 group">
-              <div
+            {/* Save / Bookmark — icon only */}
+            <button
+              onClick={(e) => { e.stopPropagation(); setBookmarked(!bookmarked) }}
+              className="flex flex-col items-center gap-[3px] active:scale-90 transition-transform"
+            >
+              <Bookmark
                 className={cn(
-                  "p-3 rounded-full transition-all",
-                  bookmarked ? "bg-yellow-500/30" : "bg-white/10 hover:bg-white/20",
+                  "h-8 w-8 drop-shadow-md transition-all duration-200",
+                  bookmarked
+                    ? "fill-white text-white scale-110"
+                    : "text-white fill-transparent stroke-white stroke-[1.8]"
                 )}
-              >
-                <Bookmark className={cn("h-7 w-7", bookmarked ? "fill-yellow-500 text-yellow-500" : "text-white")} />
-              </div>
-              <span className="text-white text-xs font-semibold">Save</span>
+              />
             </button>
+
+            {/* Spinning music disc */}
+            <div
+              className="h-10 w-10 rounded-full border-[3px] border-white/50 overflow-hidden shadow-lg"
+              style={{ animation: isPlaying ? "spin 4s linear infinite" : "none" }}
+            >
+              {reel.user?.avatar ? (
+                <img src={reel.user.avatar} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">{reel.user?.name?.charAt(0)}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

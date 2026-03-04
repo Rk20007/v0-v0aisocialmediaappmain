@@ -35,10 +35,12 @@ export default function CreatePage() {
   // Voice recognition state
   const [isListening, setIsListening] = useState(false)
   const [isCameraOpen, setIsCameraOpen] = useState(false)
-  
+  const [facingMode, setFacingMode] = useState("user")
+
   const videoRef = useRef(null)
   const streamRef = useRef(null)
   const recognitionRef = useRef(null)
+  const basePromptRef = useRef("") // stores text before voice started
 
   // Fetch wallet/coin data (for checking balance only)
   const { data: walletData, mutate: mutateWallet } = useSWR("/api/wallet", fetcher, {
@@ -94,6 +96,9 @@ export default function CreatePage() {
       return
     }
 
+    // Save current text as base so interim results don't duplicate
+    basePromptRef.current = manualPrompt.trim()
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     recognitionRef.current = new SpeechRecognition()
     recognitionRef.current.continuous = false
@@ -102,24 +107,23 @@ export default function CreatePage() {
 
     recognitionRef.current.onstart = () => {
       setIsListening(true)
-      toast({
-        title: "🎤 Listening...",
-        description: "Speak your prompt now",
-      })
+      toast({ title: "🎤 Listening...", description: "Speak your prompt now" })
     }
 
     recognitionRef.current.onresult = (event) => {
+      // Build transcript from all results so far (interim + final)
       const transcript = Array.from(event.results)
         .map(result => result[0].transcript)
         .join('')
-      
-      setManualPrompt(prev => prev + ' ' + transcript)
+
+      // SET (not append) — base + new transcript to avoid duplication
+      const separator = basePromptRef.current ? ' ' : ''
+      setManualPrompt(basePromptRef.current + separator + transcript)
       setTopic("")
     }
 
     recognitionRef.current.onerror = (event) => {
       if (event.error !== "no-speech") {
-        console.error("Voice recognition error:", event.error)
         toast({
           title: "Voice Error",
           description: "Could not recognize speech. Please try again.",
@@ -144,15 +148,21 @@ export default function CreatePage() {
   }
 
   // Camera functions
-  const openCamera = async () => {
+  const openCamera = async (mode = facingMode) => {
+    // Stop any existing stream first
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: mode, width: { ideal: 1280 }, height: { ideal: 720 } },
       })
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
       }
+      setFacingMode(mode)
       setIsCameraOpen(true)
     } catch (error) {
       console.error("Camera error:", error)
@@ -162,6 +172,11 @@ export default function CreatePage() {
         variant: "destructive",
       })
     }
+  }
+
+  const flipCamera = () => {
+    const newMode = facingMode === "user" ? "environment" : "user"
+    openCamera(newMode)
   }
 
   const closeCamera = () => {
@@ -178,14 +193,18 @@ export default function CreatePage() {
       canvas.width = videoRef.current.videoWidth
       canvas.height = videoRef.current.videoHeight
       const ctx = canvas.getContext('2d')
+
+      // Mirror the captured image for front camera (selfie)
+      if (facingMode === "user") {
+        ctx.translate(canvas.width, 0)
+        ctx.scale(-1, 1)
+      }
       ctx.drawImage(videoRef.current, 0, 0)
-      const dataUrl = canvas.toDataURL('image/jpeg')
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
       setCharacterImage(dataUrl)
       closeCamera()
-      toast({
-        title: "✓ Photo Captured!",
-        description: "Face picture ready for AI generation",
-      })
+      toast({ title: "✓ Photo Captured!", description: "Face picture ready for AI generation" })
     }
   }
 
@@ -497,39 +516,40 @@ export default function CreatePage() {
       <Dialog open={isCameraOpen} onOpenChange={(open) => !open && closeCamera()}>
         <DialogContent className="max-w-md w-full p-0 overflow-hidden bg-black border-none focus:outline-none">
           <DialogTitle className="sr-only">Take Photo</DialogTitle>
-          <div className="relative">
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline 
+          <div className="relative bg-black">
+            {/* Mirror video for front camera selfie */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
               className="w-full h-auto rounded-lg"
+              style={{ transform: facingMode === "user" ? "scaleX(-1)" : "none" }}
             />
-            {/* Selfie text overlay */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full">
-              <p className="text-white font-semibold text-sm">Selfie</p>
+            {/* Top label */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-1.5 rounded-full">
+              <p className="text-white font-semibold text-sm">
+                {facingMode === "user" ? "📸 Selfie" : "📷 Camera"}
+              </p>
             </div>
             {/* Camera controls */}
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-8">
+              {/* Close */}
               <button
                 onClick={closeCamera}
                 className="p-3 bg-white/20 rounded-full hover:bg-white/40 transition-colors"
               >
                 <X className="h-6 w-6 text-white" />
               </button>
+              {/* Capture shutter */}
               <button
                 onClick={capturePhoto}
-                className="p-4 bg-white rounded-full hover:bg-gray-200 transition-colors border-4 border-[#c9424a]"
+                className="h-20 w-20 rounded-full bg-white border-4 border-[#c9424a] flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xl active:scale-95"
               >
-                <Camera className="h-8 w-8 text-[#c9424a]" />
+                <div className="h-14 w-14 rounded-full bg-[#c9424a]" />
               </button>
+              {/* Flip camera */}
               <button
-                onClick={() => {
-                  if (videoRef.current && videoRef.current.srcObject) {
-                    const tracks = videoRef.current.srcObject.getTracks()
-                    tracks.forEach(track => track.stop())
-                    openCamera()
-                  }
-                }}
+                onClick={flipCamera}
                 className="p-3 bg-white/20 rounded-full hover:bg-white/40 transition-colors"
               >
                 <RotateCcw className="h-6 w-6 text-white" />

@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Download, Maximize2 } from "lucide-react"
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Download, Trash2 } from "lucide-react"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
@@ -21,7 +21,11 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
   const [showMenu, setShowMenu] = useState(false)
   const [showFullView, setShowFullView] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleted, setIsDeleted] = useState(false)
   const videoRef = useRef(null)
+
+  const isOwner = post.userId === currentUserId
   
   // Get first reel for display in post card
   const firstReel = reels && reels.length > 0 ? reels[0] : null
@@ -59,6 +63,29 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
       console.error("Failed to add comment")
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this post? This cannot be undone.")) return
+    setShowMenu(false)
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/posts?postId=${post._id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (data.success) {
+        setIsDeleted(true)
+        onUpdate?.()
+      } else {
+        alert(data.error || "Failed to delete post")
+      }
+    } catch (error) {
+      alert("Failed to delete post")
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -111,6 +138,9 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
 
   const timeAgo = formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })
 
+  // Hide card immediately after deletion
+  if (isDeleted) return null
+
   return (
     <Card className="border-0 shadow-lg overflow-hidden animate-fade-in">
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
@@ -146,13 +176,16 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
                   <Download className="h-4 w-4 text-muted-foreground" />
                   Download Image
                 </button>
-                <button onClick={() => {
-                  setShowFullView(true)
-                  setShowMenu(false)
-                }} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
-                  <Maximize2 className="h-4 w-4 text-muted-foreground" />
-                  Delete
-                </button>
+                {isOwner && (
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors text-left text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {isDeleting ? "Deleting…" : "Delete"}
+                  </button>
+                )}
               </div>
             </>
           )}

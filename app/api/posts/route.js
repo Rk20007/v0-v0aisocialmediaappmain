@@ -88,6 +88,38 @@ export async function PUT(request) {
   }
 }
 
+export async function DELETE(request) {
+  try {
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const postId = searchParams.get("postId")
+
+    if (!postId) {
+      return NextResponse.json({ success: false, error: "Post ID required" }, { status: 400 })
+    }
+
+    const db = await getDb()
+
+    const result = await db.collection("posts").deleteOne({
+      _id: new ObjectId(postId),
+      userId: new ObjectId(session.userId), // Only the owner can delete
+    })
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ success: false, error: "Post not found or unauthorized" }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, message: "Post deleted successfully" })
+  } catch (error) {
+    console.error("Delete post error:", error)
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
+  }
+}
+
 export async function GET(request) {
   try {
     const session = await getSession()
