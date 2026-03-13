@@ -63,22 +63,38 @@ export default function ReelsPage() {
     }
   }, [initialReelId, reels.length])
 
+  const [startX, setStartX] = useState(null)
+  const [startY, setStartY] = useState(null)
+  const router = useRouter()
+
   const handleTouchStart = (e) => {
-    lastYRef.current = e.touches[0].clientY
+    const touch = e.touches[0]
+    setStartX(touch.clientX)
+    setStartY(touch.clientY)
   }
 
   const handleTouchEnd = (e) => {
-    const touchEndY = e.changedTouches[0].clientY
-    const diff = lastYRef.current - touchEndY
-    scrollVelocityRef.current = diff
+    if (!startX || !startY) return
 
-    if (Math.abs(diff) > 30) {
-      if (diff > 0 && currentIndex < reels.length - 1) {
+    const touch = e.changedTouches[0]
+    const deltaX = startX - touch.clientX
+    const deltaY = startY - touch.clientY
+
+    // Priority: vertical scroll > horizontal back
+    if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
+      // Vertical scroll
+      if (deltaY > 0 && currentIndex < reels.length - 1) {
         setCurrentIndex((prev) => Math.min(prev + 1, reels.length - 1))
-      } else if (diff < 0 && currentIndex > 0) {
+      } else if (deltaY < 0 && currentIndex > 0) {
         setCurrentIndex((prev) => Math.max(prev - 1, 0))
       }
+    } else if (deltaX > 100) {
+      // Horizontal left swipe → back to feed
+      router.back()
     }
+
+    setStartX(null)
+    setStartY(null)
   }
 
   useEffect(() => {

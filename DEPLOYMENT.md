@@ -1,4 +1,4 @@
-# Deployment Guide - Colorcode
+# Deployment Guide - ColorKode
 
 ## Prerequisites
 
@@ -11,8 +11,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/colorcode.git
-   cd colorcode
+   git clone https://github.com/yourusername/ColorKode.git
+   cd ColorKode
    ```
 
 2. **Install dependencies**

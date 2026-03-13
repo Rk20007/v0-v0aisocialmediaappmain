@@ -1,8 +1,18 @@
-# Redesign TODO
+# Signup Fix TODO
 
-## Steps
+**Status**: Approved - implementing empty email fix
 
-- [x] Understand layout structure (AppHeader h-14, BottomNav h-16 = 7.5rem total)
-- [x] 1. Reels page — fix height to 100dvh-7.5rem, remove progress bar, add "Reels" label + frosted upload button top-right
-- [x] 2. Messages page — Instagram DM inbox (username+compose header, search, story circles, clean conversation rows, unread badge)
-- [x] 3. Chat page — Instagram DM chat (phone/video/info header, gradient own-bubbles, camera+mic+heart input bar)
+## Steps:
+- [x] Create TODO.md ✅
+- [x] Edit app/api/auth/signup/route.js → set email: null if no email ✅
+- [x] Test new signup (mobile: 7740866666) ✅
+- [x] Verify admin login still works ✅ 
+- [x] Complete task ✅
+
+## Changes:
+```
+app/api/auth/signup/route.js
+- email: email ? email.toLowerCase().trim() : "",
++ email: email ? email.toLowerCase().trim() : null,
+```
+
