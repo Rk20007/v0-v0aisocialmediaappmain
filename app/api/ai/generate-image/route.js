@@ -53,7 +53,7 @@ export async function POST(req) {
 
     // Send to n8n webhook
     const response = await fetch(
-      "https://n8n.srv1387094.hstgr.cloud/webhook/ColorKode-image-modal",
+      "https://n8n.srv1387094.hstgr.cloud/webhook/colorcode-image-modal",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
