@@ -114,7 +114,7 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
       try {
         await navigator.share({
           title: `Post by ${post.user?.name}`,
-          text: post.caption || 'Check out this post on Colorcode',
+          text: post.caption || 'Check out this post on ColorKode',
           url: window.location.href
         })
       } catch (err) { 

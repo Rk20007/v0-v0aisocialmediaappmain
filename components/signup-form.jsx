@@ -69,7 +69,7 @@ export default function SignupForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#c9424a]">Colorcode</h1>
+          <h1 className="text-4xl font-bold text-[#c9424a]">ColorKode</h1>
           <p className="text-muted-foreground mt-2">Join the AI Revolution</p>
         </div>
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Plus, Users, MessageCircle, Film } from "lucide-react"
+import { Home, Film, Plus, Users, MessageCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const sideItems = [
@@ -14,15 +14,22 @@ const sideItems = [
 
 export default function BottomNav() {
   const pathname = usePathname()
+
+  // ── Full-screen pages: hide nav entirely ──
+  const isReels = pathname === "/reels" || pathname.startsWith("/reels/")
+  const isChat  = pathname.startsWith("/messages/") && pathname !== "/messages"
+  if (isReels || isChat) return null
+
   const isCreateActive = pathname === "/create" || pathname.startsWith("/create/")
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-bottom">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-card/95 backdrop-blur-md border-t border-border" />
+      <div className="absolute inset-0 bg-background/96 backdrop-blur-xl border-t border-border/40" />
 
-      <div className="relative flex items-center justify-around h-16 max-w-lg mx-auto px-2">
-        {/* Left two items */}
+      <div className="relative flex items-center justify-around h-[60px] max-w-lg mx-auto px-3">
+
+        {/* Left two: Home, Reels */}
         {sideItems.slice(0, 2).map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
           const Icon = item.icon
@@ -30,45 +37,47 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 rounded-xl transition-all",
-                isActive ? "text-[#c9424a]" : "text-muted-foreground hover:text-foreground",
-              )}
+              className="flex flex-col items-center justify-center flex-1 h-full gap-[3px] active:opacity-70"
             >
-              <div className={cn("p-1.5 rounded-xl transition-all", isActive && "bg-[#c9424a]/10")}>
-                <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
-              </div>
-              <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+              <Icon
+                className={cn(
+                  "transition-all duration-200",
+                  isActive
+                    ? "text-[#c9424a] h-[27px] w-[27px]"
+                    : "text-foreground/50 dark:text-white/50 h-[25px] w-[25px]",
+                )}
+                strokeWidth={isActive ? 2.4 : 1.7}
+              />
             </Link>
           )
         })}
 
-        {/* Centre Create button — elevated */}
-        <div className="flex flex-col items-center justify-center flex-1 relative" style={{ marginTop: "-20px" }}>
-          <Link href="/create" className="flex flex-col items-center gap-1">
-            <div
+        {/* Centre: Create — thin circle, no fill background */}
+        <Link
+          href="/create"
+          className="flex flex-col items-center justify-center flex-1 h-full active:opacity-70"
+        >
+          <div
+            className={cn(
+              "h-9 w-9 rounded-full border-[2px] flex items-center justify-center transition-all duration-200",
+              isCreateActive
+                ? "border-[#c9424a]"
+                : "border-foreground/55 dark:border-white/55",
+            )}
+          >
+            <Plus
               className={cn(
-                "h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg transition-all active:scale-95",
+                "h-[18px] w-[18px] transition-all duration-200",
                 isCreateActive
-                  ? "bg-[#a0353b] shadow-[#c9424a]/40"
-                  : "bg-gradient-to-br from-[#c9424a] to-[#e06b72] shadow-[#c9424a]/30",
+                  ? "text-[#c9424a]"
+                  : "text-foreground/65 dark:text-white/65",
               )}
-              style={{ boxShadow: "0 4px 20px rgba(201,66,74,0.45)" }}
-            >
-              <Plus className="h-7 w-7 text-white" strokeWidth={2.5} />
-            </div>
-            <span
-              className={cn(
-                "text-[10px] font-semibold tracking-wide",
-                isCreateActive ? "text-[#c9424a]" : "text-muted-foreground",
-              )}
-            >
-              Create
-            </span>
-          </Link>
-        </div>
+              strokeWidth={2.5}
+            />
+          </div>
+        </Link>
 
-        {/* Right two items */}
+        {/* Right two: Friends, Chat */}
         {sideItems.slice(2).map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
           const Icon = item.icon
@@ -76,18 +85,21 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 rounded-xl transition-all",
-                isActive ? "text-[#c9424a]" : "text-muted-foreground hover:text-foreground",
-              )}
+              className="flex flex-col items-center justify-center flex-1 h-full gap-[3px] active:opacity-70"
             >
-              <div className={cn("p-1.5 rounded-xl transition-all", isActive && "bg-[#c9424a]/10")}>
-                <Icon className={cn("h-5 w-5 transition-transform", isActive && "scale-110")} />
-              </div>
-              <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+              <Icon
+                className={cn(
+                  "transition-all duration-200",
+                  isActive
+                    ? "text-[#c9424a] h-[27px] w-[27px]"
+                    : "text-foreground/50 dark:text-white/50 h-[25px] w-[25px]",
+                )}
+                strokeWidth={isActive ? 2.4 : 1.7}
+              />
             </Link>
           )
         })}
+
       </div>
     </nav>
   )

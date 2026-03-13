@@ -4,22 +4,29 @@ import Link from "next/link"
 import { useState } from "react"
 import useSWR from "swr"
 import { useAuth } from "@/components/auth-provider"
+import { usePathname } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { FileText, Film, Heart, Plus, Zap, Wallet } from "lucide-react"
+import { Plus, Zap } from "lucide-react"
 import WalletPopup from "./wallet-popup"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
 export default function AppHeader({ title }) {
   const { user } = useAuth()
+  const pathname = usePathname()
   const [showMenu, setShowMenu] = useState(false)
   const [showWallet, setShowWallet] = useState(false)
-  
-  // Fetch wallet/coin data
+
+  // All hooks must be called before any early return
   const { data: walletData } = useSWR("/api/wallet", fetcher, {
     revalidateOnFocus: false,
   })
-  
+
+  // Hide header on full-screen pages
+  const isReels = pathname === "/reels" || pathname.startsWith("/reels/")
+  const isChat  = pathname.startsWith("/messages/") && pathname !== "/messages"
+  if (isReels || isChat) return null
+
   const coins = walletData?.coins || 0
 
   return (
@@ -29,7 +36,7 @@ export default function AppHeader({ title }) {
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border safe-top">
         <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
           <Link href="/feed" className="text-xl font-bold text-[#c9424a]">
-            {title || "Colorcode"}
+            {title || "ColorKode"}
           </Link>
 
           <div className="flex items-center gap-2">

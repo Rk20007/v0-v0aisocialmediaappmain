@@ -90,7 +90,7 @@ export default function ChatPage({ friendId }) {
   /* ── Loading skeleton ── */
   if (!friend) {
     return (
-      <div className="flex flex-col h-[calc(100dvh-7.5rem)] bg-white dark:bg-black">
+      <div className="flex flex-col h-[100dvh] bg-white dark:bg-black">
         <div className="flex items-center gap-2 px-2 py-2 border-b border-gray-200 dark:border-zinc-800">
           <Link href="/messages">
             <button className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 active:opacity-70">
@@ -104,7 +104,7 @@ export default function ChatPage({ friendId }) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-7.5rem)] bg-white dark:bg-black">
+    <div className="flex flex-col h-[100dvh] bg-white dark:bg-black">
 
       {/* ── Instagram-style Header ── */}
       <div className="flex items-center gap-1 px-1 py-2 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-black">

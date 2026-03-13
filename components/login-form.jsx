@@ -50,7 +50,7 @@ export default function LoginForm() {
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-[#c9424a] to-[#e06b72] shadow-lg mb-4">
             <span className="text-white text-2xl font-black">C</span>
           </div>
-          <h1 className="text-4xl font-bold text-[#c9424a]">Colorcode</h1>
+          <h1 className="text-4xl font-bold text-[#c9424a]">ColorKode</h1>
           <p className="text-muted-foreground mt-1 text-sm">AI-Powered Social Network</p>
         </div>
 

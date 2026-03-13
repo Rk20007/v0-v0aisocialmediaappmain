@@ -187,7 +187,7 @@ export default function ReelsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-8rem)] bg-gradient-to-b from-slate-950 to-black">
+      <div className="flex items-center justify-center h-[100dvh] bg-gradient-to-b from-slate-950 to-black">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-white mb-4 mx-auto" />
           <p className="text-white/60">Loading reels...</p>
@@ -198,7 +198,7 @@ export default function ReelsPage() {
 
   if (showUpload) {
     return (
-      <div className="p-4 min-h-[calc(100vh-8rem)] bg-gradient-to-b from-slate-950 to-black">
+      <div className="p-4 min-h-[100dvh] bg-gradient-to-b from-slate-950 to-black pt-safe">
         <Card className="border-0 shadow-2xl max-w-lg mx-auto bg-slate-900 border-slate-700">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-6">
@@ -394,12 +394,12 @@ export default function ReelsPage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[calc(100dvh-7.5rem)] bg-black overflow-hidden"
+      className="relative h-[100dvh] bg-black overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* Top bar: "Reels" label + Create button */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-3 pb-2">
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-12 pb-2">
         <span className="text-white text-xl font-bold drop-shadow-md tracking-tight">Reels</span>
         <Button
           onClick={() => setShowUpload(true)}

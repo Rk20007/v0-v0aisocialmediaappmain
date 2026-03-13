@@ -18,7 +18,7 @@ export async function POST(request) {
     // Upload to Cloudinary
     const cloudinaryFormData = new FormData()
     cloudinaryFormData.append("file", image)
-    cloudinaryFormData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "colorcode_preset")
+    cloudinaryFormData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "ColorKode_preset")
 
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "demo"}/image/upload`
 

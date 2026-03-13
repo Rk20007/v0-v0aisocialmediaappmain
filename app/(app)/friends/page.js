@@ -1,7 +1,7 @@
 import FriendsPage from "@/components/friends-page"
 
 export const metadata = {
-  title: "Friends - Colorcode",
+  title: "Friends - ColorKode",
   description: "Manage your friends",
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "Colorcode - AI-Powered Social Network",
-  "short_name": "Colorcode",
-  "description": "Share your creativity with the world on Colorcode, the next-generation AI-powered social platform",
+  "name": "ColorKode - AI-Powered Social Network",
+  "short_name": "ColorKode",
+  "description": "Share your creativity with the world on ColorKode, the next-generation AI-powered social platform",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

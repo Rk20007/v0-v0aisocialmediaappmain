@@ -32,7 +32,7 @@ export async function POST(request) {
     }
 
     const timestamp = Math.round(new Date().getTime() / 1000)
-    const folder = "colorcode/reels"
+    const folder = "ColorKode/reels"
 
     // Signature string must contain all params in alphabetical order (excluding api_key, file, resource_type)
     const signatureString = `folder=${folder}&timestamp=${timestamp}${apiSecret}`

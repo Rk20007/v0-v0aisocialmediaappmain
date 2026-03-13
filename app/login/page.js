@@ -3,8 +3,8 @@ import { getSession } from "@/lib/auth"
 import LoginForm from "@/components/login-form"
 
 export const metadata = {
-  title: "Login - Colorcode",
-  description: "Sign in to your Colorcode account",
+  title: "Login - ColorKode",
+  description: "Sign in to your ColorKode account",
 }
 
 export default async function LoginPage() {

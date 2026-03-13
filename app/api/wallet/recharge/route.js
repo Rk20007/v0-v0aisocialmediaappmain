@@ -18,28 +18,35 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Invalid amount or coins" }, { status: 400 })
     }
 
-    // Guard: ensure Razorpay keys are configured
+    // Guard: Razorpay keys must be present
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      console.error("[v0] Razorpay keys are not configured in environment variables")
-      return NextResponse.json({ success: false, error: "Payment gateway not configured" }, { status: 500 })
+      console.error("[v0] Razorpay keys missing — add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env.local")
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Payment gateway not configured. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to your .env.local file.",
+        },
+        { status: 503 }
+      )
     }
 
-    // Lazy-initialize Razorpay inside the handler so env vars are guaranteed to be loaded
+    // Lazy-initialize Razorpay inside the handler so env vars are always resolved
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     })
 
-    // Convert to paise (integer) — Razorpay requires a whole-number integer
+    // Calculate price in paise (Razorpay uses smallest currency unit)
     const priceInPaise = Math.round(amount * 100)
 
     // Create Razorpay order
     const order = await razorpay.orders.create({
       amount: priceInPaise,
       currency: "INR",
-      receipt: `rcpt_${session.userId.toString().slice(-8)}_${Date.now().toString(36)}`,
+      receipt: `wallet_recharge_${session.userId}_${Date.now()}`,
       notes: {
-        userId: session.userId.toString(),
+        userId: session.userId,
         coins: coins.toString(),
       },
     })
@@ -51,18 +58,15 @@ export async function POST(request) {
       keyId: process.env.RAZORPAY_KEY_ID,
     })
   } catch (error) {
-    // Razorpay SDK errors nest the real description inside error.error
-    const razorpayDesc = error?.error?.description
-    const message = razorpayDesc || error?.message || "Failed to create order"
-    console.error("[v0] Create order error:", JSON.stringify(error, null, 2))
-    return NextResponse.json({ success: false, error: message }, { status: 500 })
+    console.error("[v0] Create order error:", error.message, error)
+    return NextResponse.json({ success: false, error: "Failed to create order" }, { status: 500 })
   }
 }
 
 export async function PUT(request) {
   try {
     const session = await getSession()
-    
+
     if (!session || !session.userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
@@ -73,14 +77,14 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: "Invalid payment details" }, { status: 400 })
     }
 
-    // Verify the payment with Razorpay
+    // Lazy-initialize Razorpay for payment verification
     if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-      try {
-        const razorpay = new Razorpay({
-          key_id: process.env.RAZORPAY_KEY_ID,
-          key_secret: process.env.RAZORPAY_KEY_SECRET,
-        })
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET,
+      })
 
+      try {
         const payment = await razorpay.payments.fetch(paymentId)
 
         if (payment.status !== "captured") {
@@ -91,10 +95,8 @@ export async function PUT(request) {
           return NextResponse.json({ success: false, error: "Order mismatch" }, { status: 400 })
         }
       } catch (razorError) {
-        const razorpayDesc = razorError?.error?.description
-        console.error("[v0] Razorpay verification error:", razorpayDesc || razorError.message)
+        console.error("[v0] Razorpay verification error:", razorError.message)
         // For development, allow the transaction if Razorpay verification fails
-        // In production, you may want to be stricter
       }
     }
 
@@ -116,8 +118,8 @@ export async function PUT(request) {
             paymentId: paymentId,
             orderId: orderId,
             date: new Date(),
-          }
-        }
+          },
+        },
       }
     )
 

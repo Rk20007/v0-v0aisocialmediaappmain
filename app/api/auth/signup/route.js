@@ -57,7 +57,7 @@ export async function POST(request) {
 
     const newUser = {
       _id: new ObjectId(),
-      email: email ? email.toLowerCase().trim() : "",
+      email: email ? email.toLowerCase().trim() : null,
       mobile: mobile ? mobile.trim() : "",
       password: hashedPassword,
       name: name.trim(),

@@ -3,8 +3,8 @@ import { getSession } from "@/lib/auth"
 import SignupForm from "@/components/signup-form"
 
 export const metadata = {
-  title: "Sign Up - Colorcode",
-  description: "Create your Colorcode account",
+  title: "Sign Up - ColorKode",
+  description: "Create your ColorKode account",
 }
 
 export default async function SignupPage() {

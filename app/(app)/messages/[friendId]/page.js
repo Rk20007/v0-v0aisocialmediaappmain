@@ -1,7 +1,7 @@
 import ChatPage from "@/components/chat-page"
 
 export const metadata = {
-  title: "Chat - Colorcode",
+  title: "Chat - ColorKode",
 }
 
 export default async function Chat({ params }) {

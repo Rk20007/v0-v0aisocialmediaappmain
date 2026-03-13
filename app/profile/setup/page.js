@@ -3,8 +3,8 @@ import { getSession } from "@/lib/auth"
 import ProfileSetup from "@/components/profile-setup"
 
 export const metadata = {
-  title: "Setup Profile - Colorcode",
-  description: "Complete your Colorcode profile",
+  title: "Setup Profile - ColorKode",
+  description: "Complete your ColorKode profile",
 }
 
 export default async function ProfileSetupPage() {

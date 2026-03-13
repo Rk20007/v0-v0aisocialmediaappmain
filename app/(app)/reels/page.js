@@ -1,7 +1,7 @@
 import ReelsPage from "@/components/reels-page"
 
 export const metadata = {
-  title: "Reels - Colorcode",
+  title: "Reels - ColorKode",
   description: "Watch short videos",
 }
 

@@ -1,7 +1,7 @@
 import MessagesPage from "@/components/messages-page"
 
 export const metadata = {
-  title: "Messages - Colorcode",
+  title: "Messages - ColorKode",
   description: "Chat with your friends",
 }
 

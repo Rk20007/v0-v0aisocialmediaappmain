@@ -16,19 +16,19 @@ const inter = Inter({
 })
 
 export const metadata = {
-  title: "Colorcode - AI Social Network",
+  title: "ColorKode - AI Social Network",
   description: "Create amazing AI-generated images and connect with friends",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Colorcode",
+    title: "ColorKode",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
-    title: "Colorcode - AI Social Network",
+    title: "ColorKode - AI Social Network",
     description: "Create amazing AI-generated images and connect with friends",
     type: "website",
   },
@@ -55,7 +55,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="Colorcode" />
+        <meta name="application-name" content="ColorKode" />
         <meta name="msapplication-TileColor" content="#FF6B6B" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>

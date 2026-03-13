@@ -68,7 +68,7 @@ export default function WalletPopup({ open, onOpenChange }) {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: "INR",
-        name: "ColorCode",
+        name: "ColorKode",
         description: `${pkg.coins} Coins Recharge`,
         order_id: orderData.orderId,
         handler: async (response) => {
@@ -107,7 +107,7 @@ export default function WalletPopup({ open, onOpenChange }) {
           }
         },
         prefill: {
-          name: "ColorCode User",
+          name: "ColorKode User",
         },
         theme: {
           color: "#c9424a",

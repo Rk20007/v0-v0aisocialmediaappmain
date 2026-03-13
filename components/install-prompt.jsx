@@ -92,7 +92,7 @@ export default function InstallPrompt() {
             </div>
 
             <div className="flex-1">
-              <h3 className="font-bold text-white mb-1">Install Colorcode</h3>
+              <h3 className="font-bold text-white mb-1">Install ColorKode</h3>
 
               {isIOS ? (
                 <div className="text-white/90 text-sm space-y-1">

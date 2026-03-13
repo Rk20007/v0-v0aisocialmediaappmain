@@ -9,10 +9,16 @@ import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Volume2, VolumeX } 
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 export default function ReelPostCard({ reel, currentUserId }) {
   const { toast } = useToast()
+  const router = useRouter()
+  // Strip the "reel-" prefix added by feed-page to get the real MongoDB _id
+  const reelId = typeof reel._id === "string" && reel._id.startsWith("reel-")
+    ? reel._id.slice(5)
+    : reel._id
   const [liked, setLiked] = useState(reel.likes?.includes(currentUserId))
   const [likesCount, setLikesCount] = useState(reel.likes?.length || 0)
   const [showComments, setShowComments] = useState(false)
@@ -139,8 +145,11 @@ export default function ReelPostCard({ reel, currentUserId }) {
       <CardContent className="px-4 pb-2">
         {reel.caption && <p className="text-sm mb-3 whitespace-pre-wrap">{reel.caption}</p>}
 
-        {/* Reel Video - autoplay like Facebook */}
-        <div onClick={togglePlay} className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
+        {/* Reel Video — tap to open full-screen reels page */}
+        <div
+          onClick={() => router.push(`/reels?id=${reelId}`)}
+          className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group"
+        >
           <video
             ref={videoRef}
             src={reel.videoUrl}
