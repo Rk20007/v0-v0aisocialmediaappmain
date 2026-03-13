@@ -1,4 +1,4 @@
-import ReelsPage from "@/components/reels-page"
+import ReelsPage from "../../../components/reels-page"
 
 export const metadata = {
   title: "Reels - ColorKode",

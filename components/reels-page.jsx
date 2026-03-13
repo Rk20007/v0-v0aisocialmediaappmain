@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 import {
   Heart,
   MessageCircle,
