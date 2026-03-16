@@ -59,7 +59,7 @@ export default function AppHeader({ title }) {
               
               {showMenu && (
                 <div className="absolute right-0 top-full mt-2 bg-background border border-border rounded-lg shadow-lg p-2 w-40 z-50">
-                  <Link href="/create">
+                  <Link href="/feed">
                     <div className="px-4 py-2 hover:bg-muted rounded cursor-pointer transition-colors text-sm">
                       📝 Create Post
                     </div>
