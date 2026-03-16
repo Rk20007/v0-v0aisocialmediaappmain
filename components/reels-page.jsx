@@ -416,7 +416,7 @@ export default function ReelsPage() {
       onTouchEnd={handleTouchEnd}
     >
       {/* Top bar: "Reels" label + Create button */}
-      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-12 pb-2">
+      <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-6 pb-2">
         <span className="text-white text-xl font-bold drop-shadow-md tracking-tight">Reels</span>
         <Button
           onClick={() => setShowUpload(true)}
@@ -448,7 +448,7 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
   const [likesCount, setLikesCount] = useState(reel.likes?.length || 0)
   const [bookmarked, setBookmarked] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isMuted, setIsMuted] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
   const [showHeart, setShowHeart] = useState(false)
   const [showPause, setShowPause] = useState(false)
   const videoRef = useRef(null)
@@ -459,7 +459,11 @@ function ReelCard({ reel, isActive, currentUserId, onMutate }) {
     if (!videoRef.current) return
     if (isActive) {
       videoRef.current.currentTime = 0
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+      videoRef.current.muted = isMuted
+      videoRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false))
     } else {
       videoRef.current.pause()
       setIsPlaying(false)

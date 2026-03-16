@@ -10,9 +10,9 @@ import useSWR from "swr"
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
 const RECHARGE_PACKAGES = [
-  { id: 1, coins: 100, price: 100, popular: false },
-  { id: 2, coins: 500, price: 500, popular: true },
-  { id: 3, coins: 1000, price: 900, discount: true },
+  { id: 1, coins: 50, price: 50, popular: false },
+  { id: 2, coins: 100, price: 100, popular: true },
+  { id: 3, coins: 500, price: 500, discount: true },
 ]
 
 export default function WalletPopup({ open, onOpenChange }) {
@@ -168,7 +168,10 @@ export default function WalletPopup({ open, onOpenChange }) {
 
         {/* Recharge Packages */}
         <div className="p-6 space-y-4">
-          <h3 className="font-bold text-[#2d0f11]">Select Package</h3>
+          <div className="flex items-baseline justify-between">
+            <h3 className="font-bold text-[#2d0f11]">Select Package</h3>
+            <p className="text-xs text-[#a0353b] font-medium">Minimum recharge ₹50</p>
+          </div>
           
           <div className="grid grid-cols-3 gap-3">
             {RECHARGE_PACKAGES.map((pkg) => (
@@ -209,7 +212,9 @@ export default function WalletPopup({ open, onOpenChange }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-bold text-[#4a181b]">Cost per image</p>
-                <p className="text-sm text-[#a0353b]">20 coins per AI generation</p>
+                <p className="text-sm text-[#a0353b]">
+                  First 2 images free, then 10 coins per AI generation
+                </p>
               </div>
               <div className="h-10 w-10 rounded-full bg-[#c9424a] flex items-center justify-center">
                 <Zap className="h-5 w-5 text-white" />

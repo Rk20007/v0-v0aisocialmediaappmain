@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
-const COIN_COST_PER_IMAGE = 20
+const COIN_COST_PER_IMAGE = 10
+const FREE_IMAGES_LIMIT = 2
 
 export default function CreatePage() {
   const router = useRouter()
@@ -48,6 +49,8 @@ export default function CreatePage() {
   })
 
   const coins = walletData?.coins || 0
+  const freeImagesUsed = walletData?.freeImagesUsed || 0
+  const freeImagesLeft = Math.max(0, FREE_IMAGES_LIMIT - freeImagesUsed)
 
   // Load saved data from memory on mount
   useEffect(() => {
@@ -267,8 +270,8 @@ export default function CreatePage() {
       return
     }
 
-    // Check if user has enough coins
-    if (coins < COIN_COST_PER_IMAGE) {
+    // Check balance only if no free images left
+    if (freeImagesLeft <= 0 && coins < COIN_COST_PER_IMAGE) {
       toast({
         title: "Insufficient Coins",
         description: `You need ${COIN_COST_PER_IMAGE} coins. You have ${coins} coins. Recharge from header.`,
@@ -310,10 +313,17 @@ export default function CreatePage() {
         if (deductData.success) {
           mutateWallet()
         }
+
+        const costText =
+          deductData.freeImagesLeft !== undefined && deductData.freeImagesLeft >= 0
+            ? deductData.freeImagesLeft >= 0 && freeImagesLeft > 0
+              ? "This one was free. 🎁"
+              : `- ${COIN_COST_PER_IMAGE} coins`
+            : `- ${COIN_COST_PER_IMAGE} coins`
         
         toast({
           title: "✨ Image Generated!",
-          description: `आपकी AI creation तैयार है (-${COIN_COST_PER_IMAGE} coins)`,
+          description: `आपकी AI creation तैयार है (${costText})`,
         })
       } else {
         toast({
@@ -594,14 +604,22 @@ export default function CreatePage() {
         {!imageSrc && (
         <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl mt-8">
           <CardContent className="p-6 space-y-6">
-            {/* Cost per image info */}
+            {/* Cost / free images info */}
             <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-600" />
-                  <span className="text-sm font-medium text-yellow-800">Cost per image</span>
+                  <span className="text-sm font-medium text-yellow-800">
+                    {freeImagesLeft > 0
+                      ? `First ${FREE_IMAGES_LIMIT} images are FREE`
+                      : "Cost per image"}
+                  </span>
                 </div>
-                <span className="text-lg font-bold text-[#c9424a]">{COIN_COST_PER_IMAGE} coins</span>
+                <span className="text-lg font-bold text-[#c9424a]">
+                  {freeImagesLeft > 0
+                    ? `${freeImagesLeft} free left, then ${COIN_COST_PER_IMAGE} coins`
+                    : `${COIN_COST_PER_IMAGE} coins`}
+                </span>
               </div>
             </div>
 
@@ -800,7 +818,7 @@ export default function CreatePage() {
                     if (e.target.value.trim()) setTopic("")
                   }}
                   placeholder="अपना खुद का prompt लिखें... (e.g., नीली साड़ी में खूबसूरत लड़की)"
-                  className="w-full min-h-28 resize-none text-base font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-4 pr-14 transition-all shadow-sm"
+                  className="w-full min-h-28 resize-none text-base font-medium border-2 border-[#c9424a]/30 focus:border-[#c9424a] rounded-xl p-4 pr-16 transition-all shadow-sm"
                 />
                 
                 {/* Voice Input Button */}

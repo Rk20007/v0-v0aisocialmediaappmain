@@ -6,7 +6,7 @@ import useSWR from "swr"
 import { useAuth } from "@/components/auth-provider"
 import { usePathname } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, Zap } from "lucide-react"
+import { Plus, Wallet, Zap } from "lucide-react"
 import WalletPopup from "./wallet-popup"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
@@ -45,7 +45,7 @@ export default function AppHeader({ title }) {
               onClick={() => setShowWallet(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 transition-colors"
             >
-              <Zap className="h-4 w-4 text-yellow-600" />
+              <Wallet className="h-4 w-4 text-yellow-600" />
               <span className="text-sm font-bold text-[#c9424a]">{coins}</span>
             </button>
 

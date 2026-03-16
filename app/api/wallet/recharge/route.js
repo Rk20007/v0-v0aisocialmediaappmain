@@ -18,6 +18,14 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Invalid amount or coins" }, { status: 400 })
     }
 
+    // Enforce minimum recharge of ₹50
+    if (amount < 50) {
+      return NextResponse.json(
+        { success: false, error: "Minimum recharge amount is ₹50" },
+        { status: 400 }
+      )
+    }
+
     // Guard: Razorpay keys must be present
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       console.error("[v0] Razorpay keys missing — add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env.local")
@@ -41,10 +49,14 @@ export async function POST(request) {
     const priceInPaise = Math.round(amount * 100)
 
     // Create Razorpay order
+    // Razorpay requires `receipt` length <= 40 characters
+    const rawReceipt = `w_${session.userId}_${Date.now()}`
+    const safeReceipt = rawReceipt.slice(0, 40)
+
     const order = await razorpay.orders.create({
       amount: priceInPaise,
       currency: "INR",
-      receipt: `wallet_recharge_${session.userId}_${Date.now()}`,
+      receipt: safeReceipt,
       notes: {
         userId: session.userId,
         coins: coins.toString(),

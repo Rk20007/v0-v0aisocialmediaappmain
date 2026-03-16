@@ -104,7 +104,7 @@ export default function ChatPage({ friendId }) {
   }
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white dark:bg-black">
+    <div className="fixed inset-0 flex flex-col bg-white dark:bg-black">
 
       {/* ── Instagram-style Header ── */}
       <div className="flex items-center gap-1 px-1 py-2 border-b border-gray-200 dark:border-zinc-800 bg-white dark:bg-black">

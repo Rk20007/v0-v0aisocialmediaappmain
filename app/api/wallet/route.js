@@ -18,7 +18,7 @@ export async function GET() {
 
     const user = await users.findOne(
       { _id: userId },
-      { projection: { coins: 1, coinHistory: 1 } }
+      { projection: { coins: 1, coinHistory: 1, freeImagesUsed: 1 } }
     )
 
     if (!user) {
@@ -28,7 +28,8 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       coins: user.coins || 0,
-      coinHistory: user.coinHistory || []
+      coinHistory: user.coinHistory || [],
+      freeImagesUsed: user.freeImagesUsed || 0
     })
   } catch (error) {
     console.error("[v0] Get wallet error:", error.message)
