@@ -52,16 +52,39 @@ export async function POST(req) {
     }
 
     // Send to n8n webhook
-    const response = await fetch(
-      "https://n8n.srv1387094.hstgr.cloud/webhook/colorcode-image-modal",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPayload),
-      }
-    )
+    let data
+    try {
+      const response = await fetch(
+        "https://n8n.limbutech.in/webhook/ef9049a4-dd5a-49ac-91a4-cd732379460e",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newPayload),
+        }
+      )
 
-    const data = await response.json()
+      if (!response.ok) {
+        console.error("[v0] n8n webhook error:", response.status, await response.text())
+        return NextResponse.json(
+          {
+            success: false,
+            error: "AI image service is temporarily unavailable. Please try again in a minute.",
+          },
+          { status: 503 }
+        )
+      }
+
+      data = await response.json()
+    } catch (networkErr) {
+      console.error("[v0] n8n webhook network error:", networkErr)
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Cannot reach AI image service right now (network timeout). Please check your connection or try again later.",
+        },
+        { status: 503 }
+      )
+    }
 
     // Save generation log to DB (best-effort — don't fail the request if this errors)
     try {
@@ -72,7 +95,7 @@ export async function POST(req) {
         topic,
         characterImageUrl: finalCharacterUrl,
         uniformImageUrl: finalUniformUrl,
-        coinsUsed: 20,
+        coinsUsed: 10,
         status: response.ok ? "success" : "failed",
         createdAt: new Date(),
       })
