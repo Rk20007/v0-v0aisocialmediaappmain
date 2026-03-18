@@ -211,42 +211,48 @@ export default function CreatePage() {
     }
   }
 
-  // Combined prompts for single dropdown
+  // Combined prompts for single dropdown (en = AI prompt value, hi = display label)
   const allPrompts = [
-    { category: "Women - महिला", prompts: [
-      "पारंपरिक लाल साड़ी में सुंदर दुल्हन",
-      "शादी की रस्म में गहरे रंग की साड़ी",
-      "पीले रंग की मेहंदी सूट में खूबसूरत लड़की",
-      "गुलाबी लहंगा चोली में दुल्हन",
-      "सुनहरी बॉर्डर वाली रेड साड़ी",
-      "नीली साड़ी में देसी लुक",
-      "हरे रंग का स्टाइलिश सलवार सूट",
-      "मरून लहंगा में शादी का लुक",
-      "ऑरेंज साड़ी में ट्रेडिशनल स्टाइल",
-      "सफेद और गोल्ड साड़ी में एलिगेंट लुक",
-      "पिंक पार्टी ड्रेस में मॉडर्न लुक",
-      "काली साड़ी में बोल्ड अवतार",
-      "बैंगनी लहंगा में संगीत सेरेमनी",
-      "फिरोजी सूट में कैजुअल लुक",
-      "गोल्डन साड़ी में फेस्टिवल लुक"
-    ]},
-    { category: "Men - पुरुष", prompts: [
-      "सफेद शेरवानी में हैंडसम दूल्हा",
-      "क्रीम कलर का शेरवानी लुक",
-      "गोल्डन शेरवानी में शाही अंदाज",
-      "नेवी ब्लू सूट में स्मार्ट लुक",
-      "मरून शेरवानी में शादी का लुक",
-      "काला कुर्ता पजामा में देसी स्टाइल",
-      "ऑफ-व्हाइट कुर्ता में ट्रेडिशनल लुक",
-      "ब्राउन शेरवानी में एलिगेंट स्टाइल",
-      "पिंक शेरवानी में मॉडर्न दूल्हा",
-      "ग्रे सूट में फॉर्मल लुक",
-      "सफेद कुर्ता पायजामा में सिंपल लुक",
-      "बेज शेरवानी में संगीत सेरेमनी",
-      "ब्लैक टक्सीडो में वेस्टर्न लुक",
-      "आइवरी शेरवानी में रॉयल स्टाइल",
-      "डार्क ब्लू कुर्ता में कैजुअल लुक"
-    ]}
+    {
+      category: "Women - महिला",
+      prompts: [
+        { en: "Beautiful bride in traditional red saree", hi: "पारंपरिक लाल साड़ी में सुंदर दुल्हन" },
+        { en: "Bride in dark saree during wedding ritual", hi: "शादी की रस्म में गहरे रंग की साड़ी" },
+        { en: "Beautiful girl in yellow mehendi suit", hi: "पीले रंग की मेहंदी सूट में खूबसूरत लड़की" },
+        { en: "Bride in pink lehenga choli", hi: "गुलाबी लहंगा चोली में दुल्हन" },
+        { en: "Red saree with golden border", hi: "सुनहरी बॉर्डर वाली रेड साड़ी" },
+        { en: "Desi look in blue saree", hi: "नीली साड़ी में देसी लुक" },
+        { en: "Stylish green salwar suit", hi: "हरे रंग का स्टाइलिश सलवार सूट" },
+        { en: "Wedding look in maroon lehenga", hi: "मरून लहंगा में शादी का लुक" },
+        { en: "Traditional style in orange saree", hi: "ऑरेंज साड़ी में ट्रेडिशनल स्टाइल" },
+        { en: "Elegant look in white and gold saree", hi: "सफेद और गोल्ड साड़ी में एलिगेंट लुक" },
+        { en: "Modern look in pink party dress", hi: "पिंक पार्टी ड्रेस में मॉडर्न लुक" },
+        { en: "Bold look in black saree", hi: "काली साड़ी में बोल्ड अवतार" },
+        { en: "Sangeet ceremony look in purple lehenga", hi: "बैंगनी लहंगा में संगीत सेरेमनी" },
+        { en: "Casual look in turquoise suit", hi: "फिरोजी सूट में कैजुअल लुक" },
+        { en: "Festival look in golden saree", hi: "गोल्डन साड़ी में फेस्टिवल लुक" },
+      ]
+    },
+    {
+      category: "Men - पुरुष",
+      prompts: [
+        { en: "Handsome groom in white sherwani", hi: "सफेद शेरवानी में हैंडसम दूल्हा" },
+        { en: "Cream color sherwani look", hi: "क्रीम कलर का शेरवानी लुक" },
+        { en: "Royal look in golden sherwani", hi: "गोल्डन शेरवानी में शाही अंदाज" },
+        { en: "Smart look in navy blue suit", hi: "नेवी ब्लू सूट में स्मार्ट लुक" },
+        { en: "Wedding look in maroon sherwani", hi: "मरून शेरवानी में शादी का लुक" },
+        { en: "Desi style in black kurta pajama", hi: "काला कुर्ता पजामा में देसी स्टाइल" },
+        { en: "Traditional look in off-white kurta", hi: "ऑफ-व्हाइट कुर्ता में ट्रेडिशनल लुक" },
+        { en: "Elegant style in brown sherwani", hi: "ब्राउन शेरवानी में एलिगेंट स्टाइल" },
+        { en: "Modern groom in pink sherwani", hi: "पिंक शेरवानी में मॉडर्न दूल्हा" },
+        { en: "Formal look in grey suit", hi: "ग्रे सूट में फॉर्मल लुक" },
+        { en: "Simple look in white kurta pajama", hi: "सफेद कुर्ता पायजामा में सिंपल लुक" },
+        { en: "Sangeet ceremony in beige sherwani", hi: "बेज शेरवानी में संगीत सेरेमनी" },
+        { en: "Western look in black tuxedo", hi: "ब्लैक टक्सीडो में वेस्टर्न लुक" },
+        { en: "Royal style in ivory sherwani", hi: "आइवरी शेरवानी में रॉयल स्टाइल" },
+        { en: "Casual look in dark blue kurta", hi: "डार्क ब्लू कुर्ता में कैजुअल लुक" },
+      ]
+    }
   ]
 
   const handleGenerate = async () => {
@@ -605,23 +611,49 @@ export default function CreatePage() {
         <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl mt-8">
           <CardContent className="p-6 space-y-6">
             {/* Cost / free images info */}
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-600" />
-                  <span className="text-sm font-medium text-yellow-800">
-                    {freeImagesLeft > 0
-                      ? `First ${FREE_IMAGES_LIMIT} images are FREE`
-                      : "Cost per image"}
-                  </span>
-                </div>
-                <span className="text-lg font-bold text-[#c9424a]">
-                  {freeImagesLeft > 0
-                    ? `${freeImagesLeft} free left, then ${COIN_COST_PER_IMAGE} coins`
-                    : `${COIN_COST_PER_IMAGE} coins`}
-                </span>
-              </div>
-            </div>
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#c9424a] to-[#e06b72] p-[2px] shadow-lg">
+  <div className="rounded-2xl bg-gradient-to-r from-[#fff7f7] to-[#fff0f0] px-4 py-3">
+    <div className="flex items-center justify-between gap-3">
+
+      {/* Left: Free badge */}
+      <div className="flex items-center gap-2.5">
+        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center shadow-md">
+          <Zap className="h-5 w-5 text-white fill-white" />
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold text-[#a0353b] uppercase tracking-wide leading-none mb-0.5">
+            {freeImagesLeft > 0 ? "🎉 Free Images Available" : "💰 Paid Images"}
+          </p>
+
+          <p className="text-[11px] text-[#c9424a]/70 leading-none">
+            {freeImagesLeft > 0
+              ? `${freeImagesLeft} of ${FREE_IMAGES_LIMIT} free images left`
+              : "Free limit finished"}
+          </p>
+        </div>
+      </div>
+
+      {/* Right: Pricing */}
+      <div className="flex flex-col items-end">
+        {freeImagesLeft > 0 && (
+          <span className="bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm mb-1">
+            2 FREE
+          </span>
+        )}
+
+        <span className="text-base font-extrabold text-[#c9424a] leading-tight">
+          {COIN_COST_PER_IMAGE} <span className="text-xs font-semibold">coins/image</span>
+        </span>
+
+        <span className="text-[10px] text-[#a0353b]/60 leading-none">
+          after free limit
+        </span>
+      </div>
+
+    </div>
+  </div>
+</div>
 
             {/* Character Image Upload */}
             <div className="space-y-4">
@@ -791,7 +823,7 @@ export default function CreatePage() {
                   {allPrompts.map((category) => (
                     <optgroup key={category.category} label={category.category}>
                       {category.prompts.map((prompt, idx) => (
-                        <option key={idx} value={prompt}>{prompt}</option>
+                        <option key={idx} value={prompt.en}>{prompt.en} | {prompt.hi}</option>
                       ))}
                     </optgroup>
                   ))}
@@ -1067,7 +1099,7 @@ export default function CreatePage() {
                       {allPrompts.map((category) => (
                         <optgroup key={category.category} label={category.category}>
                           {category.prompts.map((prompt, idx) => (
-                            <option key={idx} value={prompt}>{prompt}</option>
+                            <option key={idx} value={prompt.en}>{prompt.hi} | {prompt.en}</option>
                           ))}
                         </optgroup>
                       ))}

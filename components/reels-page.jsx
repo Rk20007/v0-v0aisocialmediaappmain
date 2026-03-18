@@ -411,7 +411,7 @@ export default function ReelsPage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[100dvh] bg-black overflow-hidden"
+      className="fixed inset-0 z-40 bg-black overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
