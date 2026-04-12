@@ -10,7 +10,7 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
-    const { name, bio, location, interests, avatar, coverImage } = await request.json()
+    const { name, bio, location, interests, avatar, coverImage, dailyAiImageReminder } = await request.json()
 
     const db = await getDb()
     const updateData = {
@@ -24,6 +24,7 @@ export async function PUT(request) {
     if (interests !== undefined) updateData.interests = interests
     if (avatar !== undefined) updateData.avatar = avatar
     if (coverImage !== undefined) updateData.coverImage = coverImage
+    if (dailyAiImageReminder !== undefined) updateData.dailyAiImageReminder = Boolean(dailyAiImageReminder)
 
     await db.collection("users").updateOne({ _id: new ObjectId(session.userId) }, { $set: updateData })
 

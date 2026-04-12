@@ -18,13 +18,13 @@ export default function FeedPage() {
   const { data, error, isLoading, mutate } = useSWR("/api/posts", fetcher, {
     revalidateOnFocus: false,
   })
-  const { data: reelsData } = useSWR("/api/reels", fetcher)
+  const { data: reelsData, mutate: mutateReels } = useSWR("/api/reels", fetcher)
   const [refreshing, setRefreshing] = useState(false)
   const reelsScrollRef = useRef(null)
 
   const handleRefresh = async () => {
     setRefreshing(true)
-    await mutate()
+    await Promise.all([mutate(), mutateReels()])
     setRefreshing(false)
   }
 
@@ -149,7 +149,12 @@ export default function FeedPage() {
           <div className="space-y-4">
             {feedItems.map((item) => (
               item.type === 'reel' ? (
-                <ReelPostCard key={item._id} reel={item} currentUserId={user?._id} />
+                <ReelPostCard
+                  key={item._id}
+                  reel={item}
+                  currentUserId={user?._id}
+                  onUpdate={() => mutateReels()}
+                />
               ) : (
                 <PostCard key={item._id} post={item} currentUserId={user?._id} onUpdate={() => mutate()} />
               )

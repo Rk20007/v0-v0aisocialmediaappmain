@@ -79,6 +79,9 @@ export async function POST(request) {
           date: new Date(),
         }
       ],
+      freeImagesUsed: 0,
+      aiGenerationCredits: 0,
+      starterAiBonusSlots: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
       profileComplete: false,

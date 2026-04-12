@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth"
 import { getDb } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 import AdminSidebar from "@/components/admin/admin-sidebar"
-import { Shield } from "lucide-react"
+import { Ban, Shield } from "lucide-react"
 import Link from "next/link"
 
 export const metadata = {

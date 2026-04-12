@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Download, Trash2 } from "lucide-react"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
+import ZoomablePostImage from "@/components/zoomable-post-image"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
@@ -19,13 +19,15 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
   const [comments, setComments] = useState(post.comments || [])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const [showFullView, setShowFullView] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isDeleted, setIsDeleted] = useState(false)
   const videoRef = useRef(null)
 
-  const isOwner = post.userId === currentUserId
+  const clientIsOwner =
+    Boolean(currentUserId) &&
+    (String(post.userId) === String(currentUserId) || String(post.user?._id) === String(currentUserId))
+  const isOwner = typeof post.isOwner === "boolean" ? post.isOwner : clientIsOwner
   
   // Get first reel for display in post card
   const firstReel = reels && reels.length > 0 ? reels[0] : null
@@ -167,25 +169,29 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
           {showMenu && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-1">
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-border rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-1 flex flex-col">
                 <button onClick={handleShare} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
                   <Share2 className="h-4 w-4 text-muted-foreground" />
                   Share Post
                 </button>
-                <button onClick={handleDownload} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
-                  <Download className="h-4 w-4 text-muted-foreground" />
-                  Download Image
-                </button>
-                {isOwner && (
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors text-left text-red-500"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    {isDeleting ? "Deleting…" : "Delete"}
+                {post.imageUrl ? (
+                  <button onClick={handleDownload} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
+                    <Download className="h-4 w-4 text-muted-foreground" />
+                    Download Image
                   </button>
-                )}
+                ) : null}
+                {isOwner ? (
+                  <div className="mt-1 border-t border-border pt-1">
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors text-left text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {isDeleting ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </>
           )}
@@ -221,24 +227,16 @@ export default function PostCard({ post, currentUserId, onUpdate, reels }) {
 
         {/* Show Image if available */}
         {post.imageUrl && (
-          <Dialog open={showFullView} onOpenChange={setShowFullView}>
-            
-              <div onClick={() => setShowFullView(true)} className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
-                <img
-                  src={post.imageUrl || "/placeholder.svg"}
-                  alt="Post"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-            
-            <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/90 border-none sm:max-w-fit focus:outline-none">
-              <DialogTitle className="sr-only">View Post Image</DialogTitle>
-              <div className="relative flex items-center justify-center h-full max-h-[70vh] w-full p-2">
-                <img src={post.imageUrl || "/placeholder.svg"} alt="Post" className="max-h-[65vh] w-auto object-contain rounded-md" />
-              </div>
-            </DialogContent>
-          </Dialog>
+          <ZoomablePostImage src={post.imageUrl} alt="Post">
+            <div className="relative rounded-xl overflow-hidden bg-muted aspect-square cursor-pointer group">
+              <img
+                src={post.imageUrl || "/placeholder.svg"}
+                alt="Post"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+            </div>
+          </ZoomablePostImage>
         )}
 
         {post.tags?.length > 0 && (

@@ -10,7 +10,7 @@ export async function PUT(request, { params }) {
   try {
     const { userId } = await params
     const body = await request.json()
-    const { name, email, mobile, coins, banned, isAdmin } = body
+    const { name, email, mobile, coins, banned, isAdmin, starterAiBonusSlots, freeImagesUsed } = body
 
     const updateFields = { updatedAt: new Date() }
     if (name !== undefined) updateFields.name = name.trim()
@@ -19,6 +19,14 @@ export async function PUT(request, { params }) {
     if (coins !== undefined) updateFields.coins = parseInt(coins)
     if (banned !== undefined) updateFields.banned = Boolean(banned)
     if (isAdmin !== undefined) updateFields.isAdmin = Boolean(isAdmin)
+    if (starterAiBonusSlots !== undefined) {
+      const n = parseInt(starterAiBonusSlots, 10)
+      if (Number.isFinite(n) && n >= 0 && n <= 100) updateFields.starterAiBonusSlots = n
+    }
+    if (freeImagesUsed !== undefined) {
+      const n = parseInt(freeImagesUsed, 10)
+      if (Number.isFinite(n) && n >= 0 && n <= 500) updateFields.freeImagesUsed = n
+    }
 
     const result = await db
       .collection("users")

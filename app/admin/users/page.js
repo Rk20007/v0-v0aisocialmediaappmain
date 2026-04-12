@@ -73,7 +73,14 @@ function RechargeModal({ user, onClose, onSuccess }) {
 }
 
 function EditModal({ user, onClose, onSuccess }) {
-  const [form, setForm] = useState({ name: user.name || "", email: user.email || "", mobile: user.mobile || "", coins: user.coins || 0 })
+  const [form, setForm] = useState({
+    name: user.name || "",
+    email: user.email || "",
+    mobile: user.mobile || "",
+    coins: user.coins || 0,
+    starterAiBonusSlots: user.starterAiBonusSlots ?? 0,
+    freeImagesUsed: user.freeImagesUsed ?? 0,
+  })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -106,6 +113,29 @@ function EditModal({ user, onClose, onSuccess }) {
                 className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9424a]/30" />
             </div>
           ))}
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Extra starter AI slots (admin bonus)</label>
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={form.starterAiBonusSlots}
+              onChange={(e) => setForm({ ...form, starterAiBonusSlots: e.target.value })}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9424a]/30"
+            />
+            <p className="text-[10px] text-gray-400 mt-0.5">Adds to base 2 free AI images for new users.</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Starter images used (reset to 0 to refill)</label>
+            <input
+              type="number"
+              min={0}
+              max={500}
+              value={form.freeImagesUsed}
+              onChange={(e) => setForm({ ...form, freeImagesUsed: e.target.value })}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#c9424a]/30"
+            />
+          </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-2 pt-1">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50">Cancel</button>

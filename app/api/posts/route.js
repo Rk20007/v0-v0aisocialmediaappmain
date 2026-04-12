@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getDb } from "@/lib/mongodb"
 import { getSession } from "@/lib/auth"
 import { ObjectId } from "mongodb"
+import { getAppSettings } from "@/lib/app-settings"
 
 export async function POST(request) {
   try {
@@ -26,11 +27,30 @@ export async function POST(request) {
       likes: [],
       comments: [],
       shares: 0,
+      shareRewardClaimed: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
 
     await db.collection("posts").insertOne(post)
+
+    const appSettings = await getAppSettings(db)
+    if (appSettings.walletEnabled) {
+      await db.collection("users").updateOne(
+        { _id: new ObjectId(session.userId) },
+        {
+          $inc: { coins: 1 },
+          $push: {
+            coinHistory: {
+              type: "bonus",
+              coins: 1,
+              description: "Post to feed reward",
+              date: new Date(),
+            },
+          },
+        }
+      )
+    }
 
     // Get user info for the response
     const user = await db
@@ -157,18 +177,24 @@ export async function GET(request) {
       ])
       .toArray()
 
-    const serializedPosts = posts.map((post) => ({
-      ...post,
-      _id: post._id.toString(),
-      userId: post.userId.toString(),
-      user: { ...post.user, _id: post.user._id.toString() },
-      likes: post.likes.map((id) => id.toString()),
-      comments: post.comments.map((c) => ({
-        ...c,
-        _id: c._id?.toString(),
-        userId: c.userId?.toString(),
-      })),
-    }))
+    const sessionUserId = session?.userId ? String(session.userId) : ""
+
+    const serializedPosts = posts.map((post) => {
+      const authorId = post.userId.toString()
+      return {
+        ...post,
+        _id: post._id.toString(),
+        userId: authorId,
+        user: { ...post.user, _id: post.user._id.toString() },
+        likes: post.likes.map((id) => id.toString()),
+        comments: post.comments.map((c) => ({
+          ...c,
+          _id: c._id?.toString(),
+          userId: c.userId?.toString(),
+        })),
+        isOwner: Boolean(sessionUserId) && authorId === sessionUserId,
+      }
+    })
 
     return NextResponse.json({ success: true, posts: serializedPosts })
   } catch (error) {

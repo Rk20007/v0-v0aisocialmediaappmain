@@ -5,14 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Volume2, VolumeX } from "lucide-react"
+import { Heart, MessageCircle, Share2, Send, MoreHorizontal, Volume2, VolumeX, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
-export default function ReelPostCard({ reel, currentUserId }) {
+export default function ReelPostCard({ reel, currentUserId, onUpdate }) {
   const { toast } = useToast()
   const router = useRouter()
   // Strip the "reel-" prefix added by feed-page to get the real MongoDB _id
@@ -26,9 +26,16 @@ export default function ReelPostCard({ reel, currentUserId }) {
   const [comments, setComments] = useState(reel.comments || [])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isDeleted, setIsDeleted] = useState(false)
   const [isMuted, setIsMuted] = useState(true)
   const [isPlaying, setIsPlaying] = useState(true)
   const videoRef = useRef(null)
+
+  const clientIsOwner =
+    Boolean(currentUserId) &&
+    (String(reel.userId) === String(currentUserId) || String(reel.user?._id) === String(currentUserId))
+  const isOwner = typeof reel.isOwner === "boolean" ? reel.isOwner : clientIsOwner
 
   // Auto-play video
   useEffect(() => {
@@ -42,7 +49,7 @@ export default function ReelPostCard({ reel, currentUserId }) {
     setLikesCount((prev) => (liked ? prev - 1 : prev + 1))
 
     try {
-      await fetch(`/api/reels/${reel._id}/like`, {
+      await fetch(`/api/reels/${reelId}/like`, {
         method: "POST",
         credentials: "include",
       })
@@ -67,7 +74,31 @@ export default function ReelPostCard({ reel, currentUserId }) {
     }
   }
 
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this reel? This cannot be undone.")) return
+    setShowMenu(false)
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/reels?reelId=${encodeURIComponent(reelId)}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
+      const data = await res.json()
+      if (data.success) {
+        setIsDeleted(true)
+        onUpdate?.()
+      } else {
+        alert(data.error || "Failed to delete reel")
+      }
+    } catch (error) {
+      alert("Failed to delete reel")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const handleShare = async () => {
+    setShowMenu(false)
     try {
       if (navigator.share) {
         await navigator.share({
@@ -105,6 +136,8 @@ export default function ReelPostCard({ reel, currentUserId }) {
 
   const timeAgo = formatDistanceToNow(new Date(reel.createdAt), { addSuffix: true })
 
+  if (isDeleted) return null
+
   return (
     <Card className="border-0 shadow-lg overflow-hidden animate-fade-in">
       <CardHeader className="flex flex-row items-center gap-3 pb-2">
@@ -131,11 +164,23 @@ export default function ReelPostCard({ reel, currentUserId }) {
           {showMenu && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-border rounded-xl shadow-xl z-50 overflow-hidden p-1">
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-900 border border-border rounded-xl shadow-xl z-50 overflow-hidden p-1 flex flex-col">
                 <button onClick={handleShare} className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-muted rounded-lg transition-colors text-left">
                   <Share2 className="h-4 w-4 text-muted-foreground" />
                   Share Reel
                 </button>
+                {isOwner ? (
+                  <div className="mt-1 border-t border-border pt-1">
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors text-left text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {isDeleting ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </>
           )}

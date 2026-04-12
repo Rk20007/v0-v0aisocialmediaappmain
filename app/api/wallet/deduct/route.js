@@ -1,122 +1,73 @@
 import { NextResponse } from "next/server"
-import { getDb } from "@/lib/mongodb"
 import { getSession } from "@/lib/auth"
-import { ObjectId } from "mongodb"
+import { getDb } from "@/lib/mongodb"
+import { chargeAiImageIfNeeded } from "@/lib/wallet-charges"
 
-const FREE_IMAGES_LIMIT = 2
-
+/**
+ * Deduct for AI image generation (after a successful generation).
+ * Body: { purpose: "ai_image" } — coin amount comes from app settings + daily free rules.
+ */
 export async function POST(request) {
   try {
     const session = await getSession()
-    
+
     if (!session || !session.userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
-    const { coins } = await request.json()
+    const body = await request.json().catch(() => ({}))
+    const purpose = body.purpose || "ai_image"
 
-    if (!coins || coins <= 0) {
-      return NextResponse.json({ success: false, error: "Invalid coin amount" }, { status: 400 })
+    if (purpose !== "ai_image") {
+      return NextResponse.json({ success: false, error: "Unsupported purpose" }, { status: 400 })
     }
 
     const db = await getDb()
-    const users = db.collection("users")
+    const result = await chargeAiImageIfNeeded(db, session.userId)
 
-    const userId = new ObjectId(session.userId)
-
-    // Fetch current coins and how many free images were already used
-    const user = await users.findOne(
-      { _id: userId },
-      { projection: { coins: 1, freeImagesUsed: 1 } }
-    )
-
-    if (!user) {
-      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 })
-    }
-
-    const alreadyUsed = user.freeImagesUsed || 0
-
-    // If user still has free images left, don't deduct coins
-    if (alreadyUsed < FREE_IMAGES_LIMIT) {
-      const updatedUsed = alreadyUsed + 1
-
-      const result = await users.updateOne(
-        { _id: userId },
+    if (!result.success) {
+      return NextResponse.json(
         {
-          $set: { freeImagesUsed: updatedUsed },
-          $push: {
-            coinHistory: {
-              type: "free_image",
-              coins: 0,
-              description: "Free image generation",
-              date: new Date(),
-            },
-          },
-        }
+          success: false,
+          error: result.error || "Charge failed",
+          message: result.message,
+          currentCoins: result.currentCoins,
+          requiredCoins: result.requiredCoins,
+          reelsUploaded: result.reelsUploaded,
+          reelsRequiredBeforePaidAi: result.reelsRequiredBeforePaidAi,
+          dailyFreeAiLeft: result.dailyFreeAiLeft,
+          dailyFreeAiTotal: result.dailyFreeAiTotal,
+          starterFreeAiLeft: result.starterFreeAiLeft,
+          starterFreeAiTotal: result.starterFreeAiTotal,
+        },
+        { status: 400 }
       )
-
-      if (result.modifiedCount === 0) {
-        return NextResponse.json(
-          { success: false, error: "Failed to update free image usage" },
-          { status: 500 }
-        )
-      }
-
-      const freeImagesLeft = Math.max(0, FREE_IMAGES_LIMIT - updatedUsed)
-
-      return NextResponse.json({
-        success: true,
-        message: "Free image used",
-        coins: user.coins || 0,
-        freeImagesUsed: updatedUsed,
-        freeImagesLeft,
-      })
     }
 
-    // No free images left – require coins
-    if (user.coins < coins) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "Insufficient coins",
-        currentCoins: user.coins,
-        requiredCoins: coins 
-      }, { status: 400 })
-    }
-
-    // Deduct coins
-    const result = await users.updateOne(
-      { _id: userId },
-      {
-        $inc: { coins: -coins },
-        $push: {
-          coinHistory: {
-            type: "deduct",
-            coins: -coins,
-            description: "Image generation",
-            date: new Date(),
-          }
-        }
-      }
-    )
-
-    if (result.modifiedCount === 0) {
-      return NextResponse.json({ success: false, error: "Failed to deduct coins" }, { status: 500 })
-    }
-
-    // Get updated coin balance
-    const updatedUser = await users.findOne({ _id: userId }, { projection: { coins: 1, freeImagesUsed: 1 } })
-
-    const freeImagesLeft = Math.max(
-      0,
-      FREE_IMAGES_LIMIT - (updatedUser.freeImagesUsed || FREE_IMAGES_LIMIT)
-    )
+    const message = result.skipped
+      ? "No charge (wallet off)"
+      : result.usedStarterFree
+        ? "Starter free image used"
+        : result.usedDailyFree
+          ? "Daily free used"
+          : "Coins deducted"
 
     return NextResponse.json({
       success: true,
-      message: "Coins deducted successfully",
-      coins: updatedUser.coins,
-      freeImagesUsed: updatedUser.freeImagesUsed || FREE_IMAGES_LIMIT,
-      freeImagesLeft,
+      message,
+      skipped: !!result.skipped,
+      walletEnabled: result.walletEnabled !== false,
+      coins: result.coins,
+      usedStarterFree: !!result.usedStarterFree,
+      usedDailyFree: !!result.usedDailyFree,
+      charged: result.charged ?? 0,
+      dailyFreeAiLeft: result.dailyFreeAiLeft,
+      dailyFreeAiTotal: result.dailyFreeAiTotal,
+      dailyAiFreeUsed: result.dailyAiFreeUsed,
+      starterFreeAiLeft: result.starterFreeAiLeft,
+      starterFreeAiTotal: result.starterFreeAiTotal,
+      reelsUploaded: result.reelsUploaded,
+      reelsRequiredBeforePaidAi: result.reelsRequiredBeforePaidAi,
     })
   } catch (error) {
     console.error("[v0] Deduct coins error:", error.message)

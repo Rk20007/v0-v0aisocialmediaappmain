@@ -41,6 +41,9 @@ export default function ReelsPage() {
   const { data, isLoading, mutate } = useSWR("/api/reels", fetcher, {
     revalidateOnFocus: false,
   })
+  const { data: walletData, mutate: mutateWallet } = useSWR("/api/wallet", fetcher, {
+    revalidateOnFocus: false,
+  })
   const [currentIndex, setCurrentIndex] = useState(0)
   const [showUpload, setShowUpload] = useState(false)
   const [uploadStatus, setUploadStatus] = useState("idle")
@@ -174,6 +177,9 @@ export default function ReelsPage() {
       setUploadProgress(95)
 
       const reelData = await res.json()
+      if (res.status === 402) {
+        throw new Error(reelData.error || "Could not post reel")
+      }
       if (!reelData.success) {
         throw new Error(reelData.error || "Failed to create reel")
       }
@@ -182,6 +188,7 @@ export default function ReelsPage() {
       setUploadProgress(100)
 
       toast({ title: "Reel posted successfully!" })
+      mutateWallet()
 
       setTimeout(() => {
         setSelectedFile(null)
@@ -249,6 +256,9 @@ export default function ReelsPage() {
             </div>
 
             <form onSubmit={handleUploadReel} className="space-y-5">
+              <p className="text-center text-xs text-emerald-400/90">
+                Free upload · +2 coins per reel when wallet is on (Admin → App settings)
+              </p>
               <div
                 onClick={() => !selectedFile && uploadStatus === "idle" && fileInputRef.current?.click()}
                 className={cn(

@@ -3,6 +3,7 @@ import { v2 as cloudinary } from "cloudinary"
 import { getSession } from "@/lib/auth"
 import { getDb } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
+import { getAppSettings } from "@/lib/app-settings"
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -51,7 +52,6 @@ export async function POST(req) {
       uniformImage: finalUniformUrl,
     }
 
-    // Send to n8n webhook
     let data
     try {
       const response = await fetch(
@@ -86,17 +86,17 @@ export async function POST(req) {
       )
     }
 
-    // Save generation log to DB (best-effort — don't fail the request if this errors)
     try {
       const db = await getDb()
+      const settings = await getAppSettings(db)
       await db.collection("imageGenerations").insertOne({
         _id: new ObjectId(),
         userId: session?.userId ? new ObjectId(session.userId) : null,
         topic,
         characterImageUrl: finalCharacterUrl,
         uniformImageUrl: finalUniformUrl,
-        coinsUsed: 10,
-        status: response.ok ? "success" : "failed",
+        coinsUsed: settings.walletEnabled ? settings.aiImageCostCoins : 0,
+        status: "success",
         createdAt: new Date(),
       })
     } catch (logErr) {

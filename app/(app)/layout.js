@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth"
 import BottomNav from "@/components/bottom-nav"
 import AppHeader from "@/components/app-header"
 import InstallPrompt from "@/components/install-prompt"
+import DailyAiReminder from "@/components/daily-ai-reminder"
 
 export default async function AppLayout({ children }) {
   const session = await getSession()
@@ -17,6 +18,7 @@ export default async function AppLayout({ children }) {
       <main className="max-w-lg mx-auto">{children}</main>
       <BottomNav />
       <InstallPrompt />
+      <DailyAiReminder />
     </div>
   )
 }

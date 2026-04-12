@@ -10,11 +10,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Sparkles, Loader2, X, Send, Image, Plus, Camera, FolderOpen, Download, Edit, Share2, ChevronDown, Maximize2, Mic, MicOff, RotateCcw, Camera as CameraIcon, Zap } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { FREE_IMAGES_LIMIT } from "@/lib/image-quota"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
-
-const COIN_COST_PER_IMAGE = 10
-const FREE_IMAGES_LIMIT = 2
 
 export default function CreatePage() {
   const router = useRouter()
@@ -49,9 +47,16 @@ export default function CreatePage() {
   })
 
   const coins = walletData?.coins || 0
-  const freeImagesUsed = walletData?.freeImagesUsed || 0
-  const freeImagesLeft = Math.max(0, FREE_IMAGES_LIMIT - freeImagesUsed)
-
+  const walletEnabled = walletData?.walletEnabled === true
+  /** Paid AI image: at least 10 coins (matches server) */
+  const paidAiCoins = Math.max(10, Number(walletData?.aiImageCostCoins) || 10)
+  const reelsUploaded = walletData?.reelsUploaded ?? 0
+  const reelsRequired = walletData?.reelsRequiredBeforePaidAi ?? 5
+  const aiUnlimitedOff = walletData?.aiUnlimitedWhileWalletOff === true
+  const starterFreeAiLeft = walletData?.starterFreeAiLeft ?? 0
+  const starterFreeAiTotal = walletData?.starterFreeAiTotal ?? FREE_IMAGES_LIMIT
+  const paidAiReelGateOk = starterFreeAiLeft > 0 || reelsUploaded >= reelsRequired
+  const canPayForAi = paidAiReelGateOk && coins >= paidAiCoins
   // Load saved data from memory on mount
   useEffect(() => {
     const savedImage = sessionStorage.getItem('generatedImage')
@@ -276,11 +281,24 @@ export default function CreatePage() {
       return
     }
 
-    // Check balance only if no free images left
-    if (freeImagesLeft <= 0 && coins < COIN_COST_PER_IMAGE) {
+    const canUseAi =
+      !walletEnabled ||
+      aiUnlimitedOff ||
+      starterFreeAiLeft > 0 ||
+      canPayForAi
+
+    if (walletEnabled && !canUseAi) {
+      if (starterFreeAiLeft <= 0 && !paidAiReelGateOk) {
+        toast({
+          title: "Upload more reels",
+          description: `After your ${starterFreeAiTotal} free AI images, upload at least ${reelsRequired} reels to unlock paid AI (you have ${reelsUploaded}/${reelsRequired}). Each reel earns +2 coins — 5 reels = 10 coins for one image.`,
+          variant: "destructive",
+        })
+        return
+      }
       toast({
-        title: "Insufficient Coins",
-        description: `You need ${COIN_COST_PER_IMAGE} coins. You have ${coins} coins. Recharge from header.`,
+        title: "Need more coins",
+        description: `Paid AI costs ${paidAiCoins} coins. Post to the feed for free and earn +1 coin each time.`,
         variant: "destructive",
       })
       return
@@ -307,30 +325,49 @@ export default function CreatePage() {
       if (data.success && data.data?.url) {
         setImageSrc(data.data.url)
         
-        // Deduct coins after successful generation
         const deductRes = await fetch("/api/wallet/deduct", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ coins: COIN_COST_PER_IMAGE }),
+          body: JSON.stringify({ purpose: "ai_image" }),
           credentials: "include",
         })
-        
-        const deductData = await deductRes.json()
-        if (deductData.success) {
-          mutateWallet()
-        }
 
-        const costText =
-          deductData.freeImagesLeft !== undefined && deductData.freeImagesLeft >= 0
-            ? deductData.freeImagesLeft >= 0 && freeImagesLeft > 0
-              ? "This one was free. 🎁"
-              : `- ${COIN_COST_PER_IMAGE} coins`
-            : `- ${COIN_COST_PER_IMAGE} coins`
-        
-        toast({
-          title: "✨ Image Generated!",
-          description: `आपकी AI creation तैयार है (${costText})`,
-        })
+        const deductData = await deductRes.json()
+        if (!deductData.success) {
+          setImageSrc("")
+          sessionStorage.removeItem("generatedImage")
+          const msg =
+            deductData.error === "REELS_GATE"
+              ? deductData.message ||
+                `Upload ${deductData.reelsRequiredBeforePaidAi ?? reelsRequired} reels first (you have ${deductData.reelsUploaded ?? reelsUploaded}).`
+              : deductData.error || "Balance could not be updated."
+          toast({
+            title: deductData.error === "REELS_GATE" ? "Reels required" : "Could not update balance",
+            description: msg,
+            variant: "destructive",
+          })
+        } else {
+          mutateWallet()
+
+          let costText = "No charge"
+          if (deductData.skipped) {
+            costText = "Wallet off — free"
+          } else if (deductData.usedStarterFree) {
+            costText =
+              deductData.starterFreeAiLeft !== undefined
+                ? `Starter free · ${deductData.starterFreeAiLeft} left`
+                : "Starter free 🎁"
+          } else if (deductData.charged) {
+            costText = `- ${deductData.charged} coins`
+          } else if (walletEnabled) {
+            costText = `- ${paidAiCoins} coins`
+          }
+
+          toast({
+            title: "✨ Image Generated!",
+            description: `आपकी AI creation तैयार है (${costText})`,
+          })
+        }
       } else {
         toast({
           title: "Generation Failed",
@@ -374,6 +411,7 @@ export default function CreatePage() {
           caption,
           tags: tagsArray,
         }),
+        credentials: "include",
       })
 
       const data = await res.json()
@@ -381,8 +419,11 @@ export default function CreatePage() {
       if (data.success) {
         toast({
           title: "🎉 Posted!",
-          description: "आपकी creation अब live है",
+          description: walletEnabled
+            ? "Feed पर live है — posting is free · +1 coin added"
+            : "आपकी creation अब live है",
         })
+        if (walletEnabled) await mutateWallet()
         sessionStorage.removeItem('generatedImage')
         sessionStorage.removeItem('imageCaption')
         sessionStorage.removeItem('imageTags')
@@ -610,50 +651,53 @@ export default function CreatePage() {
         {!imageSrc && (
         <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-lg animate-slide-up overflow-hidden rounded-3xl mt-8">
           <CardContent className="p-6 space-y-6">
-            {/* Cost / free images info */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#c9424a] to-[#e06b72] p-[2px] shadow-lg">
-  <div className="rounded-2xl bg-gradient-to-r from-[#fff7f7] to-[#fff0f0] px-4 py-3">
-    <div className="flex items-center justify-between gap-3">
-
-      {/* Left: Free badge */}
-      <div className="flex items-center gap-2.5">
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center shadow-md">
-          <Zap className="h-5 w-5 text-white fill-white" />
-        </div>
-
-        <div>
-          <p className="text-xs font-semibold text-[#a0353b] uppercase tracking-wide leading-none mb-0.5">
-            {freeImagesLeft > 0 ? "🎉 Free Images Available" : "💰 Paid Images"}
-          </p>
-
-          <p className="text-[11px] text-[#c9424a]/70 leading-none">
-            {freeImagesLeft > 0
-              ? `${freeImagesLeft} of ${FREE_IMAGES_LIMIT} free images left`
-              : "Free limit finished"}
-          </p>
-        </div>
-      </div>
-
-      {/* Right: Pricing */}
-      <div className="flex flex-col items-end">
-        {freeImagesLeft > 0 && (
-          <span className="bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm mb-1">
-            2 FREE
-          </span>
-        )}
-
-        <span className="text-base font-extrabold text-[#c9424a] leading-tight">
-          {COIN_COST_PER_IMAGE} <span className="text-xs font-semibold">coins/image</span>
-        </span>
-
-        <span className="text-[10px] text-[#a0353b]/60 leading-none">
-          after free limit
-        </span>
-      </div>
-
-    </div>
-  </div>
-</div>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#c9424a] to-[#e06b72] p-[2px] shadow-lg">
+              <div className="rounded-2xl bg-gradient-to-r from-[#fff7f7] to-[#fff0f0] px-4 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-[#c9424a] to-[#e06b72] flex items-center justify-center shadow-md">
+                      <Zap className="h-5 w-5 text-white fill-white" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[#a0353b] uppercase tracking-wide leading-none mb-0.5">
+                        {!walletEnabled
+                          ? "✨ Wallet paused — all free"
+                          : starterFreeAiLeft > 0
+                            ? "🎁 Starter free AI"
+                            : "💰 Paid AI image"}
+                      </p>
+                      <p className="text-[11px] text-[#c9424a]/70 leading-none">
+                        {!walletEnabled
+                          ? "Post / reel / AI: no coin charges until admin enables wallet"
+                          : `After ${starterFreeAiTotal} free: ${reelsRequired} reels → paid AI (${paidAiCoins} coins)`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end text-right">
+                    {walletEnabled && starterFreeAiLeft > 0 && (
+                      <span className="bg-green-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm mb-1">
+                        FREE SLOT
+                      </span>
+                    )}
+                    <span className="text-base font-extrabold text-[#c9424a] leading-tight">
+                      {walletEnabled ? (
+                        <>
+                          {paidAiCoins}{" "}
+                          <span className="text-xs font-semibold">coins / AI</span>
+                        </>
+                      ) : (
+                        <span className="text-xs font-semibold">0 coins</span>
+                      )}
+                    </span>
+                    {walletEnabled && (
+                      <span className="text-[10px] text-[#a0353b]/60 leading-none mt-0.5">
+                        Earn: reel +2 · post to feed +1 (free)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Character Image Upload */}
             <div className="space-y-4">
@@ -898,7 +942,13 @@ export default function CreatePage() {
               ) : (
                 <>
                   <Sparkles className="h-6 w-6" />
-                  Generate AI Image ({COIN_COST_PER_IMAGE} coins)
+                  Generate AI Image (
+                  {!walletEnabled
+                    ? "free"
+                    : starterFreeAiLeft > 0
+                      ? "starter free"
+                      : `${paidAiCoins} coins`}
+                  )
                 </>
               )}
             </Button>
@@ -1161,7 +1211,13 @@ export default function CreatePage() {
                   ) : (
                     <>
                       <Sparkles className="h-5 w-5" />
-                      Regenerate ({COIN_COST_PER_IMAGE} coins)
+                      Regenerate (
+                      {!walletEnabled
+                        ? "free"
+                        : starterFreeAiLeft > 0
+                          ? "starter free"
+                          : `${paidAiCoins} coins`}
+                      )
                     </>
                   )}
                 </Button>

@@ -13,11 +13,13 @@ import {
   Menu,
   X,
   Shield,
+  SlidersHorizontal,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/admin/settings", label: "App settings", icon: SlidersHorizontal },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/recharges", label: "Recharges", icon: CreditCard },
   { href: "/admin/images", label: "AI Images", icon: ImageIcon },

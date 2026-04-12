@@ -3,6 +3,7 @@ import { getDb } from "@/lib/mongodb"
 import { getSession } from "@/lib/auth"
 import { ObjectId } from "mongodb"
 import Razorpay from "razorpay"
+import { getAppSettings } from "@/lib/app-settings"
 
 export async function POST(request) {
   try {
@@ -10,6 +11,21 @@ export async function POST(request) {
 
     if (!session || !session.userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
+    const db = await getDb()
+    const appSettings = await getAppSettings(db)
+    if (!appSettings.walletEnabled) {
+      return NextResponse.json(
+        { success: false, error: "Coin recharge is disabled until the admin enables the wallet." },
+        { status: 403 }
+      )
+    }
+    if (!appSettings.razorpayEnabled) {
+      return NextResponse.json(
+        { success: false, error: "Razorpay checkout is off. Ask the admin to enable it in Admin → App settings." },
+        { status: 403 }
+      )
     }
 
     const { amount, coins } = await request.json()
@@ -39,7 +55,6 @@ export async function POST(request) {
       )
     }
 
-    // Lazy-initialize Razorpay inside the handler so env vars are always resolved
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -83,6 +98,21 @@ export async function PUT(request) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
 
+    const dbPre = await getDb()
+    const appSettings = await getAppSettings(dbPre)
+    if (!appSettings.walletEnabled) {
+      return NextResponse.json(
+        { success: false, error: "Coin recharge is disabled until the admin enables the wallet." },
+        { status: 403 }
+      )
+    }
+    if (!appSettings.razorpayEnabled) {
+      return NextResponse.json(
+        { success: false, error: "Razorpay checkout is off. Ask the admin to enable it in Admin → App settings." },
+        { status: 403 }
+      )
+    }
+
     const { paymentId, orderId, amount, coins } = await request.json()
 
     if (!paymentId || !orderId || !amount || !coins) {
@@ -114,10 +144,8 @@ export async function PUT(request) {
 
     const db = await getDb()
     const users = db.collection("users")
-
     const userId = new ObjectId(session.userId)
 
-    // Add coins to user wallet
     const result = await users.updateOne(
       { _id: userId },
       {

@@ -1,22 +1,26 @@
 "use client"
 import useSWR from "swr"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
-import { Settings, LogOut, Grid, Bookmark, MapPin, Calendar, Loader2 } from "lucide-react"
+import ZoomablePostImage from "@/components/zoomable-post-image"
+import { Settings, LogOut, Grid, Bookmark, MapPin, Calendar, Loader2, Zap, Bell } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useToast } from "@/hooks/use-toast"
 
 const fetcher = (url) => fetch(url, { credentials: "include" }).then((res) => res.json())
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, logout } = useAuth()
+  const { toast } = useToast()
+  const { user, logout, updateProfile } = useAuth()
+  const [reminderSaving, setReminderSaving] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -34,6 +38,30 @@ export default function ProfilePage() {
   )
 
   const posts = postsData?.posts || []
+
+  const { data: walletInfo } = useSWR(user ? "/api/wallet" : null, fetcher, {
+    revalidateOnFocus: false,
+  })
+
+  const handleReminderToggle = async (checked) => {
+    if (checked && typeof window !== "undefined" && "Notification" in window) {
+      const perm = await Notification.requestPermission()
+      if (perm !== "granted") {
+        toast({
+          title: "Notifications blocked",
+          description: "Allow notifications in your browser settings to get daily reminders.",
+          variant: "destructive",
+        })
+        return
+      }
+    }
+    setReminderSaving(true)
+    const res = await updateProfile({ dailyAiImageReminder: checked })
+    setReminderSaving(false)
+    if (!res?.success) {
+      toast({ title: "Could not save preference", variant: "destructive" })
+    }
+  }
 
   const handleLogout = async () => {
     console.log("[v0] Profile logout initiated")
@@ -103,6 +131,45 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {walletInfo?.success && (
+          <div className="mt-3 rounded-xl border border-[#c9424a]/15 bg-[#c9424a]/5 px-3 py-2 space-y-2">
+            <div className="flex flex-wrap items-center gap-2 justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="h-8 w-8 rounded-full bg-yellow-50 border border-yellow-200 flex items-center justify-center shrink-0">
+                  <Zap className="h-4 w-4 text-yellow-600" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-[#c9424a] leading-tight">{walletInfo.coins ?? 0} coins</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight truncate max-w-[220px] sm:max-w-none">
+                    {walletInfo.walletEnabled
+                      ? `Starter ${walletInfo.starterFreeAiLeft ?? 0}/${walletInfo.starterFreeAiTotal ?? 2} free · reels ${walletInfo.reelsUploaded ?? 0}/${walletInfo.reelsRequiredBeforePaidAi ?? 5} for paid AI · then ${Math.max(10, Number(walletInfo.aiImageCostCoins) || 10)} coins · reel +2 · post +1 (free)`
+                      : "Wallet off — all free"}
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" variant="secondary" className="h-8 text-[11px] px-2 shrink-0">
+                <Link href="/create">Create</Link>
+              </Button>
+            </div>
+            {walletInfo.walletEnabled && (
+              <p className="text-[10px] text-muted-foreground">
+                Posting is free (+1 coin). Optional share after post for bonus coins. Razorpay: admin can enable in App settings.
+              </p>
+            )}
+            <label className="flex items-center gap-2 text-[11px] cursor-pointer select-none text-muted-foreground">
+              <input
+                type="checkbox"
+                className="rounded border-muted-foreground/40 h-3.5 w-3.5"
+                checked={!!user.dailyAiImageReminder}
+                disabled={reminderSaving}
+                onChange={(e) => handleReminderToggle(e.target.checked)}
+              />
+              <Bell className="h-3.5 w-3.5" />
+              Daily browser reminder (app open)
+            </label>
+          </div>
+        )}
+
         {/* Interests */}
         {user.interests?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
@@ -141,27 +208,21 @@ export default function ProfilePage() {
             </Card>
           ) : (
             <div className="grid grid-cols-3 gap-1">
-              {posts.map((post) => (
-                <Dialog key={post._id}>
-                  <DialogTrigger asChild>
+              {posts.map((post) =>
+                post.imageUrl ? (
+                  <ZoomablePostImage key={post._id} src={post.imageUrl} alt="Post">
                     <div className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer group">
-                      {post.imageUrl && (
-                        <img
-                          src={post.imageUrl || "/placeholder.svg"}
-                          alt="Post"
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                      )}
+                      <img
+                        src={post.imageUrl || "/placeholder.svg"}
+                        alt="Post"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
                     </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/90 border-none sm:max-w-fit focus:outline-none">
-                    <DialogTitle className="sr-only">View Post Image</DialogTitle>
-                    <div className="relative flex items-center justify-center h-full max-h-[70vh] w-full p-2">
-                      <img src={post.imageUrl || "/placeholder.svg"} alt="Post" className="max-h-[65vh] w-auto object-contain rounded-md" />
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              ))}
+                  </ZoomablePostImage>
+                ) : (
+                  <div key={post._id} className="aspect-square bg-muted rounded-lg" />
+                )
+              )}
             </div>
           )}
         </TabsContent>
